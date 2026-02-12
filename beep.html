@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beep</title>
+
+<style>
+body {
+  margin: 0;
+  background: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+button {
+  height: 70px;
+  width: 220px;
+  background: transparent;
+  border: 1px solid white;
+  color: white;
+  font-size: 16px;
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+</style>
+</head>
+
+<body>
+
+<button id="beepBtn">BEEP</button>
+
+<script>
+let ctx;
+
+function playBeep() {
+  if (!ctx) {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  if (ctx.state === "suspended") {
+    ctx.resume();
+  }
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  const now = ctx.currentTime;
+
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(440, now);
+
+  gain.gain.setValueAtTime(1, now);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(now);
+  osc.stop(now + 0.5);
+}
+
+document.getElementById("beepBtn").addEventListener("click", playBeep);
+</script>
+
+</body>
+</html>
