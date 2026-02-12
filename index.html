@@ -28,19 +28,6 @@ html, body {
   z-index: 0;
 }
 
-/* Vocal UI layer */
-#vocal {
-  position: fixed;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 200px;
-  border: none;
-  z-index: 2;
-  background: transparent;
-}
-
 /* Scrubber layer */
 #scrubber {
   position: fixed;
@@ -50,7 +37,20 @@ html, body {
   width: 700px;
   height: 120px;
   border: none;
-  z-index: 3;
+  z-index: 2;
+  background: transparent;
+}
+
+/* Vocal UI layer — now highest */
+#vocal {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 200px;
+  border: none;
+  z-index: 10; /* highest */
   background: transparent;
 }
 </style>
@@ -60,8 +60,8 @@ html, body {
 
 <div id="app">
   <iframe id="beams" src="beams.html"></iframe>
-  <iframe id="vocal" src="vocal.html"></iframe>
   <iframe id="scrubber" src="scrubber.html"></iframe>
+  <iframe id="vocal" src="vocal.html"></iframe>
 </div>
 
 </body>
