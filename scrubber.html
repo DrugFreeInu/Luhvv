@@ -8,11 +8,32 @@ body{
   margin:0;
   background:#000;
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
   height:100vh;
   font-family:system-ui;
   color:white;
+  gap:30px;
+}
+
+.controls{
+  display:flex;
+  gap:20px;
+}
+
+button{
+  width:100px;
+  height:40px;
+  border:1px solid #333;
+  background:black;
+  color:white;
+  cursor:pointer;
+  transition:background 0.2s;
+}
+
+button.active{
+  background:#0077ff;
 }
 
 .timeline{
@@ -47,6 +68,11 @@ body{
 </head>
 <body>
 
+<div class="controls">
+  <button id="playBtn">PLAY</button>
+  <button id="loopBtn">LOOP</button>
+</div>
+
 <div class="timeline" id="timeline">
   <div class="beat">1</div>
   <div class="beat">2</div>
@@ -58,14 +84,18 @@ body{
 <script>
 const timeline = document.getElementById("timeline");
 const playhead = document.getElementById("playhead");
+const playBtn = document.getElementById("playBtn");
+const loopBtn = document.getElementById("loopBtn");
 
 let isDragging = false;
+let animationId = null;
+let startTime = null;
+let duration = 2000; // 2 seconds across timeline
+let isLooping = false;
 
 timeline.addEventListener("mousedown", movePlayhead);
 playhead.addEventListener("mousedown", () => isDragging = true);
-
 document.addEventListener("mouseup", () => isDragging = false);
-
 document.addEventListener("mousemove", e => {
   if (!isDragging) return;
   updatePosition(e);
@@ -84,6 +114,73 @@ function updatePosition(e){
 
   playhead.style.left = x + "px";
 }
+
+/* === TRANSPORT LOGIC === */
+
+function startPlayback(loop=false){
+  cancelAnimationFrame(animationId);
+
+  const rect = timeline.getBoundingClientRect();
+  const width = rect.width;
+
+  startTime = null;
+  isLooping = loop;
+
+  playBtn.classList.remove("active");
+  loopBtn.classList.remove("active");
+
+  if(loop){
+    loopBtn.classList.add("active");
+  } else {
+    playBtn.classList.add("active");
+  }
+
+  function animate(timestamp){
+    if(!startTime) startTime = timestamp;
+    const elapsed = timestamp - startTime;
+    let progress = elapsed / duration;
+
+    if(progress >= 1){
+      if(isLooping){
+        startTime = timestamp;
+        progress = 0;
+      } else {
+        stopPlayback();
+        return;
+      }
+    }
+
+    playhead.style.left = (progress * width) + "px";
+    animationId = requestAnimationFrame(animate);
+  }
+
+  animationId = requestAnimationFrame(animate);
+}
+
+function stopPlayback(){
+  cancelAnimationFrame(animationId);
+  animationId = null;
+  playBtn.classList.remove("active");
+  loopBtn.classList.remove("active");
+}
+
+/* === BUTTON EVENTS === */
+
+playBtn.addEventListener("click", () => {
+  if(animationId && !isLooping){
+    stopPlayback();
+  } else {
+    startPlayback(false);
+  }
+});
+
+loopBtn.addEventListener("click", () => {
+  if(animationId && isLooping){
+    stopPlayback();
+  } else {
+    startPlayback(true);
+  }
+});
 </script>
 
 </body>
