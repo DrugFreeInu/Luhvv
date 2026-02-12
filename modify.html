@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<body style="
+margin:0;
+background:black;
+color:white;
+font-family:system-ui;
+overflow:hidden;
+">
+
+<button id="loadBtn" style="
+position:absolute;
+top:20px;
+left:20px;
+z-index:10;
+">CUSTOM</button>
+
+<input type="file" id="fileInput" accept="audio/*" style="display:none;">
+
+<canvas id="canvas"></canvas>
+
+<script>
+let ctx;
+let source;
+let lowFilter, highFilter;
+let audioBuffer;
+let isPlaying = false;
+
+const canvas = document.getElementById("canvas");
+const c = canvas.getContext("2d");
+
+resize();
+window.addEventListener("resize", resize);
+
+function resize(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+function init(){
+  if(!ctx){
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+
+document.getElementById("loadBtn").onclick = () => {
+  document.getElementById("fileInput").click();
+};
+
+document.getElementById("fileInput").addEventListener("change", async (e)=>{
+  init();
+  const file = e.target.files[0];
+  const arrayBuffer = await file.arrayBuffer();
+  audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+  startPlayback();
+});
+
+function startPlayback(){
+  if(source) source.stop();
+
+  source = ctx.createBufferSource();
+  source.buffer = audioBuffer;
+  source.loop = true;
+
+  lowFilter = ctx.createBiquadFilter();
+  lowFilter.type = "lowpass";
+
+  highFilter = ctx.createBiquadFilter();
+  highFilter.type = "highpass";
+
+  const lowGain = ctx.createGain();
+  const highGain = ctx.createGain();
+
+  lowGain.gain.value = 1;
+  highGain.gain.value = 1;
+
+  source.connect(lowFilter);
+  lowFilter.connect(lowGain);
+  lowGain.connect(ctx.destination);
+
+  source.connect(highFilter);
+  highFilter.connect(highGain);
+  highGain.connect(ctx.destination);
+
+  source.start();
+  isPlaying = true;
+}
+
+let drawing = false;
+
+canvas.addEventListener("pointerdown", (e)=>{
+  drawing = true;
+  updateSplit(e);
+});
+
+canvas.addEventListener("pointermove", (e)=>{
+  if(drawing) updateSplit(e);
+});
+
+canvas.addEventListener("pointerup", ()=>{
+  drawing = false;
+});
+
+function updateSplit(e){
+  if(!lowFilter || !highFilter) return;
+
+  const y = e.clientY;
+  const height = canvas.height;
+
+  const ratio = 1 - (y / height);
+
+  // Map screen to frequency range
+  const minFreq = 100;
+  const maxFreq = 8000;
+
+  const freq = minFreq + ratio * (maxFreq - minFreq);
+
+  lowFilter.frequency.value = freq;
+  highFilter.frequency.value = freq;
+
+  drawLine(y);
+}
+
+function drawLine(y){
+  c.clearRect(0,0,canvas.width,canvas.height);
+  c.strokeStyle = "#00aaff";
+  c.lineWidth = 3;
+  c.beginPath();
+  c.moveTo(0,y);
+  c.lineTo(canvas.width,y);
+  c.stroke();
+}
+</script>
+
+</body>
+</html>
