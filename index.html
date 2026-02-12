@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,7 +15,7 @@ html, body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Main wrapper (no animation by default) */
+/* Main wrapper */
 #app {
   position: fixed;
   inset: 0;
@@ -66,18 +67,7 @@ html, body {
   font-size: 18px;
   letter-spacing: 2px;
   opacity: 0.5;
-  pointer-events: none;
-}
-
-/* ===== Bass Shake Animation (inactive until called) ===== */
-@keyframes bassShake {
-  0%   { transform: translate(0px, 0px); }
-  15%  { transform: translate(-10px, 6px); }
-  30%  { transform: translate(8px, -8px); }
-  45%  { transform: translate(-6px, 5px); }
-  60%  { transform: translate(5px, -6px); }
-  75%  { transform: translate(-4px, 4px); }
-  100% { transform: translate(0px, 0px); }
+  pointer-events: none; /* does not block interaction */
 }
 </style>
 </head>
@@ -93,26 +83,6 @@ html, body {
 <div id="standby">
   STANDBY — WAITING FOR TRACK
 </div>
-
-<script>
-const app = document.getElementById("app");
-
-/* ===== Manual Shake Trigger (call when track plays) ===== */
-function triggerBassShake() {
-  app.style.animation = "bassShake 0.3s ease-out";
-  setTimeout(() => {
-    app.style.animation = "";
-  }, 300);
-}
-
-/*
-  No setInterval.
-  No automatic shaking.
-  System is idle until:
-  - You manually call triggerBassShake()
-  - Or you wire it to audio play event later
-*/
-</script>
 
 </body>
 </html>
