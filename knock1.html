@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hard Knock Kick</title>
+<style>
+body {
+  margin: 0;
+  background: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: system-ui;
+}
+
+button {
+  height: 80px;
+  width: 240px;
+  background: transparent;
+  border: 1px solid white;
+  color: white;
+  font-size: 18px;
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+</style>
+</head>
+<body>
+
+<button id="kickBtn">HARD KNOCK</button>
+
+<script>
+let ctx;
+
+function playKick() {
+  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+  if (ctx.state === "suspended") ctx.resume();
+
+  const now = ctx.currentTime;
+
+  // === BODY ===
+  const bodyOsc = ctx.createOscillator();
+  const bodyGain = ctx.createGain();
+
+  bodyOsc.type = "sine";
+  bodyOsc.frequency.setValueAtTime(180, now);
+  bodyOsc.frequency.exponentialRampToValueAtTime(45, now + 0.07);
+
+  bodyGain.gain.setValueAtTime(1.2, now);
+  bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+  bodyOsc.connect(bodyGain);
+  bodyGain.connect(ctx.destination);
+
+  bodyOsc.start(now);
+  bodyOsc.stop(now + 0.4);
+
+  // === CLICK LAYER ===
+  const clickOsc = ctx.createOscillator();
+  const clickGain = ctx.createGain();
+
+  clickOsc.type = "square";
+  clickOsc.frequency.setValueAtTime(1000, now);
+
+  clickGain.gain.setValueAtTime(0.4, now);
+  clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+
+  clickOsc.connect(clickGain);
+  clickGain.connect(ctx.destination);
+
+  clickOsc.start(now);
+  clickOsc.stop(now + 0.03);
+}
+
+document.getElementById("kickBtn").addEventListener("click", playKick);
+</script>
+
+</body>
+</html>
