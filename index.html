@@ -21,7 +21,7 @@ html, body {
   height: 100vh;
 }
 
-/* Beams — force full viewport */
+/* ===== Beams Background ===== */
 #beams {
   position: absolute;
   top: 0;
@@ -30,29 +30,32 @@ html, body {
   height: 100vh;
   border: none;
   z-index: 0;
+  pointer-events: none; /* Prevents touch blocking */
 }
 
-/* Scrubber layer */
+/* ===== Scrubber ===== */
 #scrubber {
   position: absolute;
-  bottom: 80px;
+  bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
-  width: 700px;
+  width: 90%;
+  max-width: 700px;
   height: 120px;
   border: none;
   z-index: 2;
   background: transparent;
 }
 
-/* Vocal layer — highest */
+/* ===== Vocal UI (Responsive + Tall Enough) ===== */
 #vocal {
   position: absolute;
-  top: 20%;
+  top: 10%;
   left: 50%;
   transform: translateX(-50%);
-  width: 600px;
-  height: 200px;
+  width: 90%;
+  max-width: 600px;
+  height: 70vh; /* Responsive height */
   border: none;
   z-index: 10;
   background: transparent;
