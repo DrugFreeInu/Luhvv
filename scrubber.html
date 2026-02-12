@@ -3,30 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <title>1–4 Scrubber</title>
+
 <style>
-body{
+html, body{
   margin:0;
-  background:#000;
+  padding:0;
+  background:transparent; /* removed black */
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  height:100vh;
+  height:100%;
+  width:100%;
   font-family:system-ui;
   color:white;
-  gap:30px;
-}
-
-.controls{
-  display:flex;
   gap:20px;
 }
 
+/* Controls */
+.controls{
+  display:flex;
+  gap:15px;
+}
+
 button{
-  width:100px;
-  height:40px;
-  border:1px solid #333;
-  background:black;
+  width:90px;
+  height:36px;
+  border:1px solid rgba(255,255,255,0.3);
+  background:transparent;
   color:white;
   cursor:pointer;
   transition:background 0.2s;
@@ -36,36 +40,42 @@ button.active{
   background:#0077ff;
 }
 
+/* Timeline */
 .timeline{
-  width:600px;
-  height:60px;
-  background:#111;
-  border:1px solid #333;
+  width:90vw;          /* responsive width */
+  max-width:600px;
+  height:50px;
+  border:1px solid rgba(255,255,255,0.2);
   position:relative;
   display:flex;
 }
 
 .beat{
   flex:1;
-  border-right:1px solid #222;
+  border-right:1px solid rgba(255,255,255,0.1);
   display:flex;
   align-items:center;
   justify-content:center;
-  color:#555;
+  color:rgba(255,255,255,0.3);
   font-weight:bold;
+}
+
+.beat:last-child{
+  border-right:none;
 }
 
 .playhead{
   position:absolute;
   top:0;
   left:0;
-  width:6px;
+  width:4px;
   height:100%;
   background:#ff2a6d;
   cursor:pointer;
 }
 </style>
 </head>
+
 <body>
 
 <div class="controls">
@@ -90,8 +100,11 @@ const loopBtn = document.getElementById("loopBtn");
 let isDragging = false;
 let animationId = null;
 let startTime = null;
-let duration = 2000; // 2 seconds across timeline
 let isLooping = false;
+
+const beatDuration = 1000;   // 1 sec per beat
+const totalBeats = 4;
+const totalDuration = beatDuration * totalBeats;
 
 timeline.addEventListener("mousedown", movePlayhead);
 playhead.addEventListener("mousedown", () => isDragging = true);
@@ -115,8 +128,7 @@ function updatePosition(e){
   playhead.style.left = x + "px";
 }
 
-/* === TRANSPORT LOGIC === */
-
+/* Transport */
 function startPlayback(loop=false){
   cancelAnimationFrame(animationId);
 
@@ -137,8 +149,9 @@ function startPlayback(loop=false){
 
   function animate(timestamp){
     if(!startTime) startTime = timestamp;
+
     const elapsed = timestamp - startTime;
-    let progress = elapsed / duration;
+    let progress = elapsed / totalDuration;
 
     if(progress >= 1){
       if(isLooping){
@@ -163,8 +176,6 @@ function stopPlayback(){
   playBtn.classList.remove("active");
   loopBtn.classList.remove("active");
 }
-
-/* === BUTTON EVENTS === */
 
 playBtn.addEventListener("click", () => {
   if(animationId && !isLooping){
