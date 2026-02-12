@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<body style="
+background:black;
+color:white;
+font-family:system-ui;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+height:100vh;
+gap:20px;
+">
+
+<button id="playBtn">PLAY</button>
+<button id="transBtn">TRANSPARENCY</button>
+
+<label>FADE LEVEL</label>
+<input type="range" id="fadeSlider" min="0" max="100" value="100">
+
+<script>
+let ctx;
+let osc;
+let gainNode;
+let transparencyMode = false;
+
+function init(){
+  if(!ctx){
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+
+function playSound(){
+  init();
+  ctx.resume();
+
+  if(osc) osc.stop();
+
+  osc = ctx.createOscillator();
+  osc.type = "sawtooth";
+  osc.frequency.value = 220;
+
+  gainNode = ctx.createGain();
+  gainNode.gain.value = 1;
+
+  osc.connect(gainNode);
+  gainNode.connect(ctx.destination);
+
+  osc.start();
+}
+
+document.getElementById("playBtn").onclick = playSound;
+
+document.getElementById("fadeSlider").oninput = (e)=>{
+  if(!gainNode) return;
+  const value = e.target.value / 100;
+  gainNode.gain.value = value;
+};
+
+document.getElementById("transBtn").onclick = ()=>{
+  transparencyMode = !transparencyMode;
+
+  if(transparencyMode && gainNode){
+    const now = ctx.currentTime;
+    gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+    gainNode.gain.linearRampToValueAtTime(0.001, now + 3);
+  }
+};
+</script>
+</body>
+</html>
