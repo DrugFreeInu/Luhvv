@@ -1,77 +1,90 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="UTF-8">
-<title>Rising Rave Smoke</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<body style="margin:0;background:black;overflow:hidden;">
+<canvas id="fog"></canvas>
 
-<style>
-html, body {
-  margin: 0;
-  height: 100%;
-  background: transparent;
-  overflow: hidden;
+<script>
+const canvas = document.getElementById("fog");
+const ctx = canvas.getContext("2d");
+
+resize();
+window.addEventListener("resize", resize);
+
+function resize(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 }
 
-/* Container */
-.smoke {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
+let particles = [];
 
-/* Individual smoke plume */
-.plume {
-  position: absolute;
-  bottom: -20%;
-  width: 30%;
-  height: 80%;
-  left: 35%;
-  background:
-    radial-gradient(circle at 50% 80%, rgba(255,255,255,0.12), transparent 60%),
-    radial-gradient(circle at 50% 60%, rgba(255,255,255,0.08), transparent 70%),
-    radial-gradient(circle at 50% 40%, rgba(255,255,255,0.05), transparent 80%);
-  filter: blur(60px);
-  mix-blend-mode: screen;
-  opacity: 0.9;
-  animation: rise 8s linear infinite;
-}
+class Particle {
+  constructor(){
+    this.x = canvas.width / 2 + (Math.random() - 0.5) * 40;
+    this.y = canvas.height + Math.random() * 60;
 
-/* Extra plumes for width */
-.plume:nth-child(2) {
-  left: 15%;
-  animation-duration: 10s;
-  opacity: 0.7;
-}
+    this.size = 15 + Math.random() * 40;
 
-.plume:nth-child(3) {
-  left: 60%;
-  animation-duration: 9s;
-  opacity: 0.8;
-}
+    this.speedY = 3 + Math.random() * 5;
+    this.speedX = (Math.random() - 0.5) * 1;
 
-@keyframes rise {
-  0% {
-    transform: translateY(0%) scaleX(1);
-    opacity: 0.9;
+    this.baseOpacity = 0.4 + Math.random() * 0.6;
+    this.opacity = this.baseOpacity;
+
+    this.fadeSpeed = 0.002 + Math.random() * 0.01; // random fade rate
+    this.flickerSpeed = 0.01 + Math.random() * 0.05; // random flicker speed
+    this.flickerOffset = Math.random() * 1000; // unique phase offset
   }
-  50% {
-    transform: translateY(-40%) scaleX(1.2);
-    opacity: 0.7;
+
+  update(time){
+    this.y -= this.speedY;
+    this.x += this.speedX;
+
+    // Fade naturally
+    this.opacity -= this.fadeSpeed;
+
+    // Add soft flicker variation
+    const flicker = Math.sin(time * this.flickerSpeed + this.flickerOffset) * 0.05;
+
+    this.currentOpacity = Math.max(0, this.opacity + flicker);
   }
-  100% {
-    transform: translateY(-80%) scaleX(1.4);
-    opacity: 0;
+
+  draw(){
+    ctx.beginPath();
+
+    // Slight size-based transparency effect
+    const sizeFade = this.size / 60;
+
+    ctx.fillStyle = `rgba(200,200,200,${this.currentOpacity * sizeFade})`;
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
   }
 }
-</style>
-</head>
 
-<body>
-<div class="smoke">
-  <div class="plume"></div>
-  <div class="plume"></div>
-  <div class="plume"></div>
-</div>
+function spawn(){
+  const count = 3 + Math.floor(Math.random() * 4); // random spawn amount
+  for(let i=0;i<count;i++){
+    particles.push(new Particle());
+  }
+}
+
+function animate(time){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  spawn();
+
+  for(let i = particles.length - 1; i >= 0; i--){
+    particles[i].update(time * 0.001);
+    particles[i].draw();
+
+    if(particles[i].opacity <= 0){
+      particles.splice(i,1);
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+</script>
 </body>
 </html>
