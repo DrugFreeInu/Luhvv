@@ -2,74 +2,228 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>luhvvcraft</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocal Builder</title>
 
 <style>
-html, body {
+body {
   margin: 0;
-  height: 100%;
-  background: #000;
-  overflow: hidden;
+  background: transparent;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 40px;
+  color: white;
 }
 
-/* Main wrapper */
-#app {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-}
-
-/* ===== Beams Background ===== */
-#beams {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  border: none;
-  z-index: 0;
-  pointer-events: none; /* Prevents touch blocking */
-}
-
-/* ===== Scrubber ===== */
-#scrubber {
-  position: absolute;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  max-width: 700px;
-  height: 120px;
-  border: none;
-  z-index: 2;
+#inputField {
+  width: 100%;
+  max-width: 500px;
+  height: 50px;
   background: transparent;
+  border: 1px solid rgba(255,255,255,0.4);
+  color: white;
+  font-size: 18px;
+  text-align: center;
+  outline: none;
 }
 
-/* ===== Vocal UI (Responsive + Tall Enough) ===== */
-#vocal {
-  position: absolute;
-  top: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  max-width: 600px;
-  height: 70vh; /* Responsive height */
-  border: none;
-  z-index: 10;
+.buttonRow {
+  margin-top: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+button {
+  width: 120px;
+  height: 40px;
   background: transparent;
+  border: 1px solid white;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  letter-spacing: 1px;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+#saveBtn.unsaved {
+  background: rgba(255, 0, 0, 0.2);
+  border-color: red;
+}
+
+#saveBtn.saved {
+  background: rgba(0, 255, 0, 0.2);
+  border-color: lime;
+}
+
+.sliderWrap {
+  width: 100%;
+  max-width: 500px;
+  margin-top: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+#pitchSlider {
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(
+    to right,
+    #001f5c 0%,
+    #2f6bff 25%,
+    #888888 50%,
+    #ff3b3b 75%,
+    #ff9ecf 100%
+  );
+}
+
+#speedSlider {
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(
+    to right,
+    #333 0%,
+    #888 50%,
+    #fff 100%
+  );
+}
+
+input[type=range]::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#presetList {
+  margin-top: 40px;
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.presetItem {
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,0.3);
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+.presetItem:hover {
+  opacity: 1;
+  background: rgba(255,255,255,0.05);
 }
 </style>
 </head>
 
 <body>
 
-<div id="app">
-  <iframe id="beams" src="beams.html"></iframe>
-  <iframe id="scrubber" src="scrubber.html"></iframe>
-  <iframe id="vocal" src="vocal.html"></iframe>
+<input id="inputField" type="text" placeholder="Type vocal phrase..." />
+
+<div class="buttonRow">
+  <button id="listenBtn">LISTEN</button>
+  <button id="saveBtn" class="unsaved">SAVE</button>
 </div>
+
+<div class="sliderWrap">
+  <label>PITCH</label>
+  <input type="range" id="pitchSlider" min="0.5" max="2" step="0.01" value="1">
+
+  <label>SPEED</label>
+  <input type="range" id="speedSlider" min="0.5" max="1.5" step="0.01" value="1">
+</div>
+
+<div id="presetList"></div>
+
+<script>
+const input = document.getElementById("inputField");
+const listenBtn = document.getElementById("listenBtn");
+const saveBtn = document.getElementById("saveBtn");
+const pitchSlider = document.getElementById("pitchSlider");
+const speedSlider = document.getElementById("speedSlider");
+const presetList = document.getElementById("presetList");
+
+let sessionPresets = [];
+
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    playCurrent();
+  }
+});
+
+listenBtn.addEventListener("click", playCurrent);
+saveBtn.addEventListener("click", savePreset);
+
+function playCurrent() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  speechSynthesis.cancel();
+
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.pitch = parseFloat(pitchSlider.value);
+  utter.rate = parseFloat(speedSlider.value);
+
+  setTimeout(() => {
+    speechSynthesis.speak(utter);
+  }, 30);
+}
+
+function savePreset() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  const preset = {
+    text: text,
+    pitch: parseFloat(pitchSlider.value),
+    speed: parseFloat(speedSlider.value)
+  };
+
+  sessionPresets.push(preset);
+  renderPresets();
+  setSaved();
+}
+
+function renderPresets() {
+  presetList.innerHTML = "";
+
+  sessionPresets.forEach((preset) => {
+    const div = document.createElement("div");
+    div.className = "presetItem";
+    div.textContent = `${preset.text} (P:${preset.pitch.toFixed(2)} S:${preset.speed.toFixed(2)})`;
+
+    div.addEventListener("click", () => {
+      input.value = preset.text;
+      pitchSlider.value = preset.pitch;
+      speedSlider.value = preset.speed;
+      setSaved();
+    });
+
+    presetList.appendChild(div);
+  });
+}
+
+function setSaved() {
+  saveBtn.classList.remove("unsaved");
+  saveBtn.classList.add("saved");
+}
+</script>
 
 </body>
 </html>
