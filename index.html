@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>DFI Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+/* Background layer */
+#beams {
+  position: fixed;
+  inset: 0;
+  border: none;
+  z-index: 0;
+}
+
+/* Vocal UI layer */
+#vocal {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 200px;
+  border: none;
+  z-index: 2;
+  background: transparent;
+}
+
+/* Scrubber layer */
+#scrubber {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 120px;
+  border: none;
+  z-index: 3;
+  background: transparent;
+}
+</style>
+</head>
+
+<body>
+
+<iframe id="beams" src="beams.html"></iframe>
+<iframe id="vocal" src="vocal.html"></iframe>
+<iframe id="scrubber" src="scrubber.html"></iframe>
+
+</body>
+</html>
