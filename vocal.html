@@ -17,7 +17,6 @@ body {
   color: white;
 }
 
-/* INPUT */
 #inputField {
   width: 100%;
   max-width: 500px;
@@ -30,7 +29,6 @@ body {
   outline: none;
 }
 
-/* BUTTONS */
 .buttonRow {
   margin-top: 20px;
   display: flex;
@@ -63,7 +61,6 @@ button:active {
   border-color: lime;
 }
 
-/* SLIDERS */
 .sliderWrap {
   width: 100%;
   max-width: 500px;
@@ -110,7 +107,6 @@ input[type=range]::-webkit-slider-thumb {
   cursor: pointer;
 }
 
-/* PRESETS */
 #presetList {
   margin-top: 40px;
   width: 100%;
@@ -165,39 +161,30 @@ const presetList = document.getElementById("presetList");
 
 let sessionPresets = [];
 
-/* ENTER = Play */
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
-    playPhrase(input.value, pitchSlider.value, speedSlider.value);
+    playCurrent();
   }
 });
 
-listenBtn.addEventListener("click", () => {
-  playPhrase(input.value, pitchSlider.value, speedSlider.value);
-});
-
+listenBtn.addEventListener("click", playCurrent);
 saveBtn.addEventListener("click", savePreset);
 
-/* SAFER PLAY FUNCTION */
-function playPhrase(text, pitch, speed) {
-  const trimmed = text.trim();
-  if (!trimmed) return;
+function playCurrent() {
+  const text = input.value.trim();
+  if (!text) return;
 
   speechSynthesis.cancel();
 
-  const utter = new SpeechSynthesisUtterance(trimmed);
-  utter.pitch = parseFloat(pitch);
-  utter.rate = parseFloat(speed);
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.pitch = parseFloat(pitchSlider.value);
+  utter.rate = parseFloat(speedSlider.value);
 
-  utter.onend = () => setSaved();
-
-  // Safari stability delay
   setTimeout(() => {
     speechSynthesis.speak(utter);
   }, 30);
 }
 
-/* SAVE PRESET */
 function savePreset() {
   const text = input.value.trim();
   if (!text) return;
@@ -213,24 +200,25 @@ function savePreset() {
   setSaved();
 }
 
-/* RENDER PRESETS */
 function renderPresets() {
   presetList.innerHTML = "";
 
   sessionPresets.forEach((preset) => {
     const div = document.createElement("div");
     div.className = "presetItem";
-    div.textContent = `${preset.text}  (P:${preset.pitch.toFixed(2)} S:${preset.speed.toFixed(2)})`;
+    div.textContent = `${preset.text} (P:${preset.pitch.toFixed(2)} S:${preset.speed.toFixed(2)})`;
 
     div.addEventListener("click", () => {
-      playPhrase(preset.text, preset.pitch, preset.speed);
+      input.value = preset.text;
+      pitchSlider.value = preset.pitch;
+      speedSlider.value = preset.speed;
+      setSaved();
     });
 
     presetList.appendChild(div);
   });
 }
 
-/* VISUAL SAVE STATE */
 function setSaved() {
   saveBtn.classList.remove("unsaved");
   saveBtn.classList.add("saved");
