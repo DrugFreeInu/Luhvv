@@ -1,60 +1,35 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bass Test</title>
+<body style="display:flex;align-items:center;justify-content:center;height:100vh;background:black;color:white;font-family:system-ui;">
 
-<style>
-body {
-  margin: 0;
-  background: black;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  font-family: sans-serif;
-}
-
-button {
-  width: 200px;
-  height: 80px;
-  font-size: 18px;
-  background: white;
-  border: none;
-  cursor: pointer;
-}
-</style>
-</head>
-
-<body>
-
-<button id="testTone">TAP FOR SOUND</button>
+<button id="bassBtn" style="height:70px;width:220px;border:1px solid white;background:transparent;color:white;font-size:16px;letter-spacing:2px;">
+BASS HIT
+</button>
 
 <script>
-let audioCtx;
+let ctx;
 
-document.getElementById("testTone").addEventListener("click", () => {
+document.getElementById("bassBtn").addEventListener("click", () => {
+  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+  ctx.resume();
 
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-
-  audioCtx.resume();
-
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
 
   osc.type = "sine";
-  osc.frequency.value = 220; // clearly audible tone
+  osc.frequency.setValueAtTime(90, ctx.currentTime); // bass frequency
 
-  gain.gain.value = 0.6;
+  const now = ctx.currentTime;
+
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(1, now + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
 
   osc.connect(gain);
-  gain.connect(audioCtx.destination);
+  gain.connect(ctx.destination);
 
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.5);
+  osc.start(now);
+  osc.stop(now + 0.4);
 });
 </script>
 
