@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vocal</title>
+<title>Vocal Builder</title>
 
 <style>
 body {
   margin: 0;
-  background: transparent;
+  background: #000;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  height: 100vh;
   color: white;
 }
 
@@ -36,11 +36,11 @@ body {
   gap: 20px;
 }
 
-.controlBtn {
+button {
   width: 120px;
   height: 40px;
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.5);
+  border: 1px solid white;
   color: white;
   cursor: pointer;
   font-size: 14px;
@@ -48,12 +48,19 @@ body {
   transition: background 0.2s ease, transform 0.1s ease;
 }
 
-.controlBtn:hover {
-  background: rgba(255,255,255,0.1);
+button:active {
+  transform: scale(0.97);
 }
 
-.controlBtn:active {
-  transform: scale(0.97);
+/* Save button states */
+#saveBtn.unsaved {
+  background: rgba(255, 0, 0, 0.2);
+  border-color: red;
+}
+
+#saveBtn.saved {
+  background: rgba(0, 255, 0, 0.2);
+  border-color: lime;
 }
 </style>
 </head>
@@ -63,8 +70,8 @@ body {
 <input id="inputField" type="text" placeholder="Type vocal phrase..." />
 
 <div class="buttonRow">
-  <button class="controlBtn" id="listenBtn">LISTEN</button>
-  <button class="controlBtn" id="saveBtn">SAVE</button>
+  <button id="listenBtn">LISTEN</button>
+  <button id="saveBtn" class="unsaved">SAVE</button>
 </div>
 
 <script>
@@ -72,62 +79,61 @@ const input = document.getElementById("inputField");
 const listenBtn = document.getElementById("listenBtn");
 const saveBtn = document.getElementById("saveBtn");
 
-let timeline = [];
-let isLooping = false;
+let lastPhrase = "";
+let isSaved = false;
+
+/* When typing again → reset save state */
+input.addEventListener("input", () => {
+  if (input.value !== lastPhrase) {
+    setUnsaved();
+  }
+});
 
 /* ENTER = Listen */
 input.addEventListener("keydown", function(e) {
   if (e.key === "Enter") {
-    triggerListen();
+    playPhrase();
   }
 });
 
-listenBtn.addEventListener("click", triggerListen);
-saveBtn.addEventListener("click", triggerSave);
+listenBtn.addEventListener("click", playPhrase);
+saveBtn.addEventListener("click", savePhrase);
 
-function triggerListen() {
+function playPhrase() {
   const text = input.value.trim();
   if (!text) return;
 
-  speak(text);
-}
+  lastPhrase = text;
 
-function triggerSave() {
-  const text = input.value.trim();
-  if (!text) return;
-
-  timeline.push(text);
-  console.log("Saved to timeline:", timeline);
-
-  if (!isLooping) {
-    startTimelineLoop();
-  }
-}
-
-function startTimelineLoop() {
-  if (timeline.length === 0) return;
-
-  isLooping = true;
-  let index = 0;
-
-  function playNext() {
-    if (timeline.length === 0) return;
-
-    speak(timeline[index]);
-    index = (index + 1) % timeline.length;
-
-    setTimeout(playNext, 2000); // adjust timing as needed
-  }
-
-  playNext();
-}
-
-function speak(text) {
   const utter = new SpeechSynthesisUtterance(text);
   utter.rate = 0.9;
-  utter.pitch = 0.8;
-  utter.volume = 1;
+  utter.pitch = 0.9;
+
+  utter.onend = () => {
+    setSaved();
+  };
+
+  speechSynthesis.cancel();
   speechSynthesis.speak(utter);
+}
+
+function savePhrase() {
+  if (!lastPhrase) return;
+
+  console.log("Saved in session:", lastPhrase);
+  setSaved();
+}
+
+function setSaved() {
+  isSaved = true;
+  saveBtn.classList.remove("unsaved");
+  saveBtn.classList.add("saved");
+}
+
+function setUnsaved() {
+  isSaved = false;
+  saveBtn.classList.remove("saved");
+  saveBtn.classList.add("unsaved");
 }
 </script>
 
