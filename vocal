@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Vocal</title>
+<style>
+body{
+  margin:0;
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+  font-family:system-ui;
+}
+input{
+  width:60%;
+  max-width:600px;
+  padding:20px;
+  font-size:22px;
+  background:#111;
+  color:#fff;
+  border:1px solid #333;
+  outline:none;
+}
+</style>
+</head>
+<body>
+
+<input id="text" placeholder="Type and press Enter..." />
+
+<script>
+const input = document.getElementById("text");
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    speak(input.value);
+    input.value = "";
+  }
+});
+
+function speak(text) {
+  if (!text.trim()) return;
+
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 1;
+  utter.pitch = 1;
+  utter.volume = 1;
+
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
+}
+</script>
+
+</body>
+</html>
