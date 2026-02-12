@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>1–4 Scrubber</title>
+<style>
+body{
+  margin:0;
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+  font-family:system-ui;
+  color:white;
+}
+
+.timeline{
+  width:600px;
+  height:60px;
+  background:#111;
+  border:1px solid #333;
+  position:relative;
+  display:flex;
+}
+
+.beat{
+  flex:1;
+  border-right:1px solid #222;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#555;
+  font-weight:bold;
+}
+
+.playhead{
+  position:absolute;
+  top:0;
+  left:0;
+  width:6px;
+  height:100%;
+  background:#ff2a6d;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="timeline" id="timeline">
+  <div class="beat">1</div>
+  <div class="beat">2</div>
+  <div class="beat">3</div>
+  <div class="beat">4</div>
+  <div class="playhead" id="playhead"></div>
+</div>
+
+<script>
+const timeline = document.getElementById("timeline");
+const playhead = document.getElementById("playhead");
+
+let isDragging = false;
+
+timeline.addEventListener("mousedown", movePlayhead);
+playhead.addEventListener("mousedown", () => isDragging = true);
+
+document.addEventListener("mouseup", () => isDragging = false);
+
+document.addEventListener("mousemove", e => {
+  if (!isDragging) return;
+  updatePosition(e);
+});
+
+function movePlayhead(e){
+  updatePosition(e);
+}
+
+function updatePosition(e){
+  const rect = timeline.getBoundingClientRect();
+  let x = e.clientX - rect.left;
+
+  if (x < 0) x = 0;
+  if (x > rect.width) x = rect.width;
+
+  playhead.style.left = x + "px";
+}
+</script>
+
+</body>
+</html>
