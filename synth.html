@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<body style="
+display:flex;
+align-items:center;
+justify-content:center;
+height:100vh;
+background:black;
+color:white;
+font-family:system-ui;
+touch-action:none;
+">
+
+<button id="synthBtn" style="
+height:100px;
+width:280px;
+border:1px solid white;
+background:transparent;
+color:white;
+font-size:20px;
+letter-spacing:2px;
+transition:background 0.1s, color 0.1s;
+">
+SYNTH (HOLD)
+</button>
+
+<script>
+let ctx;
+let osc;
+let gain;
+
+function initAudio() {
+  if (!ctx) {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (ctx.state === "suspended") ctx.resume();
+}
+
+function startSynth() {
+  initAudio();
+
+  const now = ctx.currentTime;
+
+  osc = ctx.createOscillator();
+  gain = ctx.createGain();
+
+  osc.type = "sawtooth";   // change to sine / square / triangle to experiment
+  osc.frequency.value = 220;
+
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(0.8, now + 0.05);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(now);
+
+  synthBtn.style.background = "yellow";
+  synthBtn.style.color = "black";
+}
+
+function stopSynth() {
+  if (!osc) return;
+
+  const now = ctx.currentTime;
+
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+  osc.stop(now + 0.25);
+
+  synthBtn.style.background = "transparent";
+  synthBtn.style.color = "white";
+}
+
+const synthBtn = document.getElementById("synthBtn");
+
+synthBtn.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  startSynth();
+});
+
+synthBtn.addEventListener("pointerup", stopSynth);
+synthBtn.addEventListener("pointercancel", stopSynth);
+synthBtn.addEventListener("pointerleave", stopSynth);
+</script>
+
+</body>
+</html>
