@@ -9,7 +9,7 @@
 html, body {
   margin: 0;
   height: 100%;
-  background: #000;
+  background: transparent; /* removed black */
   overflow: hidden;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
@@ -19,18 +19,19 @@ html, body {
   position: relative;
   width: 100vw;
   height: 100vh;
+  background: transparent; /* ensure no fallback */
 }
 
 /* ===== Beams Background ===== */
 #beams {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   border: none;
   z-index: 0;
-  pointer-events: none; /* Prevents touch blocking */
+  pointer-events: none;
+  background: transparent;
 }
 
 /* ===== Scrubber ===== */
@@ -47,7 +48,7 @@ html, body {
   background: transparent;
 }
 
-/* ===== Vocal UI (Responsive + Tall Enough) ===== */
+/* ===== Vocal UI ===== */
 #vocal {
   position: absolute;
   top: 10%;
@@ -55,7 +56,7 @@ html, body {
   transform: translateX(-50%);
   width: 90%;
   max-width: 600px;
-  height: 70vh; /* Responsive height */
+  height: 70vh;
   border: none;
   z-index: 10;
   background: transparent;
@@ -66,9 +67,9 @@ html, body {
 <body>
 
 <div id="app">
-  <iframe id="beams" src="beams.html"></iframe>
-  <iframe id="scrubber" src="scrubber.html"></iframe>
-  <iframe id="vocal" src="vocal.html"></iframe>
+  <iframe id="beams" src="beams.html" allowtransparency="true"></iframe>
+  <iframe id="scrubber" src="scrubber.html" allowtransparency="true"></iframe>
+  <iframe id="vocal" src="vocal.html" allowtransparency="true"></iframe>
 </div>
 
 </body>
