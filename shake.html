@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shake Engine</title>
+
+<style>
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+/* Shake layer */
+#shakeLayer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+</style>
+</head>
+
+<body>
+
+<div id="shakeLayer"></div>
+
+<script>
+const layer = document.getElementById("shakeLayer");
+
+let shaking = false;
+
+/* ---------- SHAKE MODES ---------- */
+
+function shakeLight() {
+  runShake(5, 150);
+}
+
+function shakeHeavy() {
+  runShake(15, 300);
+}
+
+function shakeWave() {
+  runWaveShake(10, 400);
+}
+
+function shakeRandom() {
+  const intensity = Math.random() * 12 + 4;
+  runShake(intensity, 250);
+}
+
+/* ---------- CORE SHAKE ---------- */
+
+function runShake(intensity, duration) {
+  if (shaking) return;
+  shaking = true;
+
+  const start = performance.now();
+
+  function animate(now) {
+    const elapsed = now - start;
+
+    if (elapsed < duration) {
+      const x = (Math.random() - 0.5) * intensity;
+      const y = (Math.random() - 0.5) * intensity;
+      layer.style.transform = `translate(${x}px, ${y}px)`;
+      requestAnimationFrame(animate);
+    } else {
+      layer.style.transform = "translate(0, 0)";
+      shaking = false;
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+/* ---------- WAVE SHAKE ---------- */
+
+function runWaveShake(intensity, duration) {
+  if (shaking) return;
+  shaking = true;
+
+  const start = performance.now();
+
+  function animate(now) {
+    const elapsed = now - start;
+
+    if (elapsed < duration) {
+      const wave = Math.sin(elapsed * 0.05) * intensity;
+      layer.style.transform = `translate(${wave}px, 0px)`;
+      requestAnimationFrame(animate);
+    } else {
+      layer.style.transform = "translate(0, 0)";
+      shaking = false;
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+/* ---------- EXPOSE TO PARENT ---------- */
+
+window.shakeLight = shakeLight;
+window.shakeHeavy = shakeHeavy;
+window.shakeWave = shakeWave;
+window.shakeRandom = shakeRandom;
+
+</script>
+
+</body>
+</html>
