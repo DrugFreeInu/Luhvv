@@ -2,227 +2,187 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vocal Builder</title>
-
+<title>1–4 Scrubber</title>
 <style>
-body {
-  margin: 0;
-  background: transparent;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 40px;
-  color: white;
+html, body{
+  margin:0;
+  height:100%;
+  background:transparent; /* removed black */
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-family:system-ui;
+  color:white;
+  gap:20px;
 }
 
-#inputField {
-  width: 100%;
-  max-width: 500px;
-  height: 50px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.4);
-  color: white;
-  font-size: 18px;
-  text-align: center;
-  outline: none;
+/* Controls */
+.controls{
+  display:flex;
+  gap:12px;
 }
 
-.buttonRow {
-  margin-top: 20px;
-  display: flex;
-  gap: 20px;
+button{
+  width:90px;
+  height:36px;
+  border:1px solid #333;
+  background:black;
+  color:white;
+  cursor:pointer;
+  transition:background 0.2s;
+  font-size:12px;
 }
 
-button {
-  width: 120px;
-  height: 40px;
-  background: transparent;
-  border: 1px solid white;
-  color: white;
-  cursor: pointer;
-  font-size: 14px;
-  letter-spacing: 1px;
-  transition: background 0.2s ease, transform 0.1s ease;
+button.active{
+  background:#0077ff;
 }
 
-button:active {
-  transform: scale(0.97);
+/* Timeline */
+.timeline{
+  width:100%;              /* fits container */
+  max-width:100%;          /* no overflow */
+  height:50px;
+  background:#111;
+  border:1px solid #333;
+  position:relative;
+  display:flex;
+  box-sizing:border-box;
 }
 
-#saveBtn.unsaved {
-  background: rgba(255, 0, 0, 0.2);
-  border-color: red;
+.beat{
+  flex:1;
+  border-right:1px solid #222;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#555;
+  font-weight:bold;
+  font-size:12px;
 }
 
-#saveBtn.saved {
-  background: rgba(0, 255, 0, 0.2);
-  border-color: lime;
-}
-
-.sliderWrap {
-  width: 100%;
-  max-width: 500px;
-  margin-top: 25px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  font-size: 12px;
-  letter-spacing: 2px;
-}
-
-#pitchSlider {
-  appearance: none;
-  width: 100%;
-  height: 6px;
-  background: linear-gradient(
-    to right,
-    #001f5c 0%,
-    #2f6bff 25%,
-    #888888 50%,
-    #ff3b3b 75%,
-    #ff9ecf 100%
-  );
-}
-
-#speedSlider {
-  appearance: none;
-  width: 100%;
-  height: 6px;
-  background: linear-gradient(
-    to right,
-    #333 0%,
-    #888 50%,
-    #fff 100%
-  );
-}
-
-input[type=range]::-webkit-slider-thumb {
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  background: white;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-#presetList {
-  margin-top: 40px;
-  width: 100%;
-  max-width: 500px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.presetItem {
-  padding: 10px;
-  border: 1px solid rgba(255,255,255,0.3);
-  cursor: pointer;
-  font-size: 14px;
-  opacity: 0.85;
-  transition: opacity 0.2s ease, background 0.2s ease;
-}
-
-.presetItem:hover {
-  opacity: 1;
-  background: rgba(255,255,255,0.05);
+.playhead{
+  position:absolute;
+  top:0;
+  left:0;
+  width:4px;
+  height:100%;
+  background:#ff2a6d;
+  cursor:pointer;
 }
 </style>
 </head>
-
 <body>
 
-<input id="inputField" type="text" placeholder="Type vocal phrase..." />
-
-<div class="buttonRow">
-  <button id="listenBtn">LISTEN</button>
-  <button id="saveBtn" class="unsaved">SAVE</button>
+<div class="controls">
+  <button id="playBtn">PLAY</button>
+  <button id="loopBtn">LOOP</button>
 </div>
 
-<div class="sliderWrap">
-  <label>PITCH</label>
-  <input type="range" id="pitchSlider" min="0.5" max="2" step="0.01" value="1">
-
-  <label>SPEED</label>
-  <input type="range" id="speedSlider" min="0.5" max="1.5" step="0.01" value="1">
+<div class="timeline" id="timeline">
+  <div class="beat">1</div>
+  <div class="beat">2</div>
+  <div class="beat">3</div>
+  <div class="beat">4</div>
+  <div class="playhead" id="playhead"></div>
 </div>
-
-<div id="presetList"></div>
 
 <script>
-const input = document.getElementById("inputField");
-const listenBtn = document.getElementById("listenBtn");
-const saveBtn = document.getElementById("saveBtn");
-const pitchSlider = document.getElementById("pitchSlider");
-const speedSlider = document.getElementById("speedSlider");
-const presetList = document.getElementById("presetList");
+const timeline = document.getElementById("timeline");
+const playhead = document.getElementById("playhead");
+const playBtn = document.getElementById("playBtn");
+const loopBtn = document.getElementById("loopBtn");
 
-let sessionPresets = [];
+let isDragging = false;
+let animationId = null;
+let startTime = null;
+let isLooping = false;
 
-input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    playCurrent();
+const beatDuration = 1000;
+const totalBeats = 4;
+const totalDuration = beatDuration * totalBeats;
+
+timeline.addEventListener("mousedown", movePlayhead);
+playhead.addEventListener("mousedown", () => isDragging = true);
+document.addEventListener("mouseup", () => isDragging = false);
+document.addEventListener("mousemove", e => {
+  if (!isDragging) return;
+  updatePosition(e);
+});
+
+function movePlayhead(e){
+  updatePosition(e);
+}
+
+function updatePosition(e){
+  const rect = timeline.getBoundingClientRect();
+  let x = e.clientX - rect.left;
+
+  if (x < 0) x = 0;
+  if (x > rect.width) x = rect.width;
+
+  playhead.style.left = x + "px";
+}
+
+function startPlayback(loop=false){
+  cancelAnimationFrame(animationId);
+
+  const rect = timeline.getBoundingClientRect();
+  const width = rect.width;
+
+  startTime = null;
+  isLooping = loop;
+
+  playBtn.classList.remove("active");
+  loopBtn.classList.remove("active");
+
+  loop ? loopBtn.classList.add("active") : playBtn.classList.add("active");
+
+  function animate(timestamp){
+    if(!startTime) startTime = timestamp;
+
+    const elapsed = timestamp - startTime;
+    let progress = elapsed / totalDuration;
+
+    if(progress >= 1){
+      if(isLooping){
+        startTime = timestamp;
+        progress = 0;
+      } else {
+        stopPlayback();
+        return;
+      }
+    }
+
+    playhead.style.left = (progress * width) + "px";
+    animationId = requestAnimationFrame(animate);
+  }
+
+  animationId = requestAnimationFrame(animate);
+}
+
+function stopPlayback(){
+  cancelAnimationFrame(animationId);
+  animationId = null;
+  playBtn.classList.remove("active");
+  loopBtn.classList.remove("active");
+}
+
+playBtn.addEventListener("click", () => {
+  if(animationId && !isLooping){
+    stopPlayback();
+  } else {
+    startPlayback(false);
   }
 });
 
-listenBtn.addEventListener("click", playCurrent);
-saveBtn.addEventListener("click", savePreset);
-
-function playCurrent() {
-  const text = input.value.trim();
-  if (!text) return;
-
-  speechSynthesis.cancel();
-
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.pitch = parseFloat(pitchSlider.value);
-  utter.rate = parseFloat(speedSlider.value);
-
-  setTimeout(() => {
-    speechSynthesis.speak(utter);
-  }, 30);
-}
-
-function savePreset() {
-  const text = input.value.trim();
-  if (!text) return;
-
-  const preset = {
-    text: text,
-    pitch: parseFloat(pitchSlider.value),
-    speed: parseFloat(speedSlider.value)
-  };
-
-  sessionPresets.push(preset);
-  renderPresets();
-  setSaved();
-}
-
-function renderPresets() {
-  presetList.innerHTML = "";
-
-  sessionPresets.forEach((preset) => {
-    const div = document.createElement("div");
-    div.className = "presetItem";
-    div.textContent = `${preset.text} (P:${preset.pitch.toFixed(2)} S:${preset.speed.toFixed(2)})`;
-
-    div.addEventListener("click", () => {
-      input.value = preset.text;
-      pitchSlider.value = preset.pitch;
-      speedSlider.value = preset.speed;
-      setSaved();
-    });
-
-    presetList.appendChild(div);
-  });
-}
-
-function setSaved() {
-  saveBtn.classList.remove("unsaved");
-  saveBtn.classList.add("saved");
-}
+loopBtn.addEventListener("click", () => {
+  if(animationId && isLooping){
+    stopPlayback();
+  } else {
+    startPlayback(true);
+  }
+});
 </script>
 
 </body>
