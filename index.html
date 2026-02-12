@@ -11,9 +11,10 @@ html, body {
   height: 100%;
   overflow: hidden;
   background: #000;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Main wrapper that will shake */
+/* Main wrapper (no animation by default) */
 #app {
   position: fixed;
   inset: 0;
@@ -53,7 +54,22 @@ html, body {
   background: transparent;
 }
 
-/* ===== Bass Shake Animation ===== */
+/* ===== Standby Overlay ===== */
+#standby {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  color: white;
+  font-size: 18px;
+  letter-spacing: 2px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ===== Bass Shake Animation (inactive until called) ===== */
 @keyframes bassShake {
   0%   { transform: translate(0px, 0px); }
   15%  { transform: translate(-10px, 6px); }
@@ -74,13 +90,14 @@ html, body {
   <iframe id="scrubber" src="scrubber.html"></iframe>
 </div>
 
+<div id="standby">
+  STANDBY — WAITING FOR TRACK
+</div>
+
 <script>
 const app = document.getElementById("app");
 
-let bpm = 120;
-let beatInterval = (60 / bpm) * 1000;
-
-// Shake every 2 beats (drop style)
+/* ===== Manual Shake Trigger (call when track plays) ===== */
 function triggerBassShake() {
   app.style.animation = "bassShake 0.3s ease-out";
   setTimeout(() => {
@@ -88,7 +105,13 @@ function triggerBassShake() {
   }, 300);
 }
 
-setInterval(triggerBassShake, beatInterval * 2);
+/*
+  No setInterval.
+  No automatic shaking.
+  System is idle until:
+  - You manually call triggerBassShake()
+  - Or you wire it to audio play event later
+*/
 </script>
 
 </body>
