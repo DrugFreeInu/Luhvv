@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<body style="
+background:black;
+color:white;
+font-family:system-ui;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+height:100vh;
+gap:20px;
+">
+
+<input id="lengthInput" type="number" min="1" max="10" value="6"
+style="
+width:100px;
+height:40px;
+background:black;
+border:1px solid #333;
+color:white;
+text-align:center;
+">
+
+<button id="dropBtn" style="
+height:90px;
+width:260px;
+border:1px solid white;
+background:black;
+color:white;
+font-size:18px;
+letter-spacing:2px;
+">
+DROP
+</button>
+
+<script>
+let ctx;
+
+function init(){
+  if(!ctx){
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+
+function makeDistortionCurve(amount){
+  const samples = 44100;
+  const curve = new Float32Array(samples);
+  for(let i=0;i<samples;i++){
+    const x = i * 2 / samples - 1;
+    curve[i] = Math.tanh(amount * x);
+  }
+  return curve;
+}
+
+function playDrop(seconds){
+  init();
+  ctx.resume();
+
+  const now = ctx.currentTime;
+
+  // MAIN OSCILLATOR
+  const osc1 = ctx.createOscillator();
+  osc1.type = "sawtooth";
+  osc1.frequency.setValueAtTime(110, now);
+
+  const osc2 = ctx.createOscillator();
+  osc2.type = "square";
+  osc2.frequency.setValueAtTime(110, now);
+
+  const mixGain = ctx.createGain();
+  mixGain.gain.value = 0.6;
+
+  const distortion = ctx.createWaveShaper();
+  distortion.curve = makeDistortionCurve(5);
+  distortion.oversample = "4x";
+
+  const filter = ctx.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.frequency.setValueAtTime(300, now);
+  filter.frequency.linearRampToValueAtTime(4000, now + seconds);
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(1.0, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + seconds + 0.5);
+
+  osc1.connect(mixGain);
+  osc2.connect(mixGain);
+  mixGain.connect(distortion);
+  distortion.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc1.start(now);
+  osc2.start(now);
+
+  osc1.stop(now + seconds + 0.6);
+  osc2.stop(now + seconds + 0.6);
+}
+
+document.getElementById("dropBtn").onclick = () => {
+  let value = parseInt(document.getElementById("lengthInput").value);
+  if(isNaN(value) || value < 1) value = 1;
+  if(value > 10) value = 10;
+  playDrop(value);
+};
+</script>
+
+</body>
+</html>
