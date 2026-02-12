@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<body style="
+background:black;
+color:white;
+font-family:system-ui;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+height:100vh;
+gap:20px;
+touch-action:none;
+">
+
+<button id="bassBtn" style="
+height:90px;
+width:260px;
+border:1px solid white;
+background:black;
+color:white;
+font-size:18px;
+letter-spacing:2px;
+">
+BASS
+</button>
+
+<label>VIBRATION DEPTH</label>
+<input type="range" id="vibeSlider" min="1" max="10" value="5">
+
+<script>
+let ctx;
+
+function init(){
+  if(!ctx){
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+
+function playBass(){
+  init();
+  ctx.resume();
+
+  const depth = parseInt(document.getElementById("vibeSlider").value);
+  const now = ctx.currentTime;
+
+  // === AUDIO BASS ===
+  const osc = ctx.createOscillator();
+  osc.type = "sine";
+  osc.frequency.value = 80 - (depth * 3); // deeper with higher depth
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(1.2, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 1);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(now);
+  osc.stop(now + 1);
+
+  // === VIBRATION ===
+  if(navigator.vibrate){
+    const pulseLength = depth * 40; // stronger feel
+    const pattern = [pulseLength, 50, pulseLength];
+    navigator.vibrate(pattern);
+  }
+}
+
+document.getElementById("bassBtn").onclick = playBass;
+</script>
+
+</body>
+</html>
