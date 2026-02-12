@@ -75,7 +75,6 @@ button:active {
   letter-spacing: 2px;
 }
 
-/* Pitch gradient */
 #pitchSlider {
   appearance: none;
   width: 100%;
@@ -126,7 +125,7 @@ input[type=range]::-webkit-slider-thumb {
   border: 1px solid rgba(255,255,255,0.3);
   cursor: pointer;
   font-size: 14px;
-  opacity: 0.8;
+  opacity: 0.85;
   transition: opacity 0.2s ease, background 0.2s ease;
 }
 
@@ -164,12 +163,13 @@ const pitchSlider = document.getElementById("pitchSlider");
 const speedSlider = document.getElementById("speedSlider");
 const presetList = document.getElementById("presetList");
 
-let lastPhrase = "";
 let sessionPresets = [];
 
-/* Enter = Play */
+/* ENTER = Play */
 input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") playPhrase(input.value, pitchSlider.value, speedSlider.value);
+  if (e.key === "Enter") {
+    playPhrase(input.value, pitchSlider.value, speedSlider.value);
+  }
 });
 
 listenBtn.addEventListener("click", () => {
@@ -178,11 +178,12 @@ listenBtn.addEventListener("click", () => {
 
 saveBtn.addEventListener("click", savePreset);
 
+/* SAFER PLAY FUNCTION */
 function playPhrase(text, pitch, speed) {
   const trimmed = text.trim();
   if (!trimmed) return;
 
-  lastPhrase = trimmed;
+  speechSynthesis.cancel();
 
   const utter = new SpeechSynthesisUtterance(trimmed);
   utter.pitch = parseFloat(pitch);
@@ -190,10 +191,13 @@ function playPhrase(text, pitch, speed) {
 
   utter.onend = () => setSaved();
 
-  speechSynthesis.cancel();
-  speechSynthesis.speak(utter);
+  // Safari stability delay
+  setTimeout(() => {
+    speechSynthesis.speak(utter);
+  }, 30);
 }
 
+/* SAVE PRESET */
 function savePreset() {
   const text = input.value.trim();
   if (!text) return;
@@ -209,6 +213,7 @@ function savePreset() {
   setSaved();
 }
 
+/* RENDER PRESETS */
 function renderPresets() {
   presetList.innerHTML = "";
 
@@ -217,14 +222,15 @@ function renderPresets() {
     div.className = "presetItem";
     div.textContent = `${preset.text}  (P:${preset.pitch.toFixed(2)} S:${preset.speed.toFixed(2)})`;
 
-    div.onclick = () => {
+    div.addEventListener("click", () => {
       playPhrase(preset.text, preset.pitch, preset.speed);
-    };
+    });
 
     presetList.appendChild(div);
   });
 }
 
+/* VISUAL SAVE STATE */
 function setSaved() {
   saveBtn.classList.remove("unsaved");
   saveBtn.classList.add("saved");
