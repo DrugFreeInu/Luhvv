@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>BELL LAB</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+html, body {
+  margin: 0;
+  background: #000;
+  color: white;
+  font-family: system-ui;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+#bellBtn {
+  width: 90%;
+  max-width: 500px;
+  height: 150px;
+  font-size: 40px;
+  margin-bottom: 30px;
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+  cursor: pointer;
+}
+
+#bellBtn:active {
+  background: rgba(255,255,255,0.08);
+}
+
+.control {
+  width: 90%;
+  max-width: 500px;
+  margin-bottom: 15px;
+}
+
+label {
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+input[type=range] {
+  width: 100%;
+}
+</style>
+</head>
+<body>
+
+<button id="bellBtn">STRIKE BELL</button>
+
+<div class="control">
+  <label>FUNDAMENTAL FREQ</label>
+  <input type="range" id="freq" min="150" max="1200" value="440">
+</div>
+
+<div class="control">
+  <label>FM RATIO</label>
+  <input type="range" id="ratio" min="0.5" max="6" step="0.1" value="2.5">
+</div>
+
+<div class="control">
+  <label>MODULATION INDEX</label>
+  <input type="range" id="index" min="0" max="500" value="120">
+</div>
+
+<div class="control">
+  <label>DECAY (SECONDS)</label>
+  <input type="range" id="decay" min="0.2" max="5" step="0.1" value="2">
+</div>
+
+<div class="control">
+  <label>FILTER CUTOFF</label>
+  <input type="range" id="cutoff" min="2000" max="12000" value="9000">
+</div>
+
+<script>
+let ctx;
+
+const btn = document.getElementById("bellBtn");
+const freqSlider = document.getElementById("freq");
+const ratioSlider = document.getElementById("ratio");
+const indexSlider = document.getElementById("index");
+const decaySlider = document.getElementById("decay");
+const cutoffSlider = document.getElementById("cutoff");
+
+function initAudio(){
+  if(!ctx){
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+
+async function strikeBell(){
+  initAudio();
+
+  if (ctx.state === "suspended") {
+    await ctx.resume();
+  }
+
+  const carrier = ctx.createOscillator();
+  const modulator = ctx.createOscillator();
+  const modGain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+  const gainNode = ctx.createGain();
+
+  const baseFreq = parseFloat(freqSlider.value);
+  const ratio = parseFloat(ratioSlider.value);
+  const index = parseFloat(indexSlider.value);
+  const decay = parseFloat(decaySlider.value);
+
+  carrier.type = "sine";
+  modulator.type = "sine";
+
+  carrier.frequency.value = baseFreq;
+  modulator.frequency.value = baseFreq * ratio;
+
+  // Safer modulation depth
+  modGain.gain.value = index;
+
+  filter.type = "lowpass";
+  filter.frequency.value = cutoffSlider.value;
+  filter.Q.value = 0.7;
+
+  // FM routing
+  modulator.connect(modGain);
+  modGain.connect(carrier.frequency);
+
+  carrier.connect(filter);
+  filter.connect(gainNode);
+  gainNode.connect(ctx.destination);
+
+  const now = ctx.currentTime;
+
+  // Soft attack
+  gainNode.gain.setValueAtTime(0, now);
+  gainNode.gain.linearRampToValueAtTime(1, now + 0.01);
+
+  // Natural decay
+  gainNode.gain.exponentialRampToValueAtTime(0.001, now + decay);
+
+  carrier.start(now);
+  modulator.start(now);
+
+  carrier.stop(now + decay + 0.3);
+  modulator.stop(now + decay + 0.3);
+}
+
+btn.addEventListener("pointerdown", strikeBell);
+</script>
+
+</body>
+</html>
