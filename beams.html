@@ -9,7 +9,7 @@
 html, body {
   margin: 0;
   height: 100%;
-  background: #000;
+  background: transparent; /* IMPORTANT */
   overflow: hidden;
 }
 
@@ -98,7 +98,6 @@ html, body {
   pointer-events: none;
 }
 
-/* Sweep geometry unchanged */
 @keyframes sweep1 {
   0%   { transform: rotate(-45deg) translateY(0%); }
   100% { transform: rotate(45deg) translateY(20%); }
@@ -114,13 +113,11 @@ html, body {
   100% { transform: rotate(40deg) translateY(-15%); }
 }
 
-/* Hue shift */
 @keyframes hueShift {
   0%   { filter: blur(60px) saturate(90%) hue-rotate(0deg); }
   100% { filter: blur(60px) saturate(90%) hue-rotate(360deg); }
 }
 
-/* Jitter */
 @keyframes jitter {
   0%   { transform: translate(0px,0px); }
   25%  { transform: translate(1px,-1px); }
@@ -140,7 +137,6 @@ html, body {
 </div>
 
 <script>
-// 50/50 random mode on load
 const stage = document.getElementById("stage");
 const randomMode = Math.random() < 0.5 ? "smooth" : "lag";
 stage.classList.add(randomMode);
