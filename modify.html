@@ -8,12 +8,12 @@ font-family:system-ui;
 overflow:hidden;
 ">
 
-<button id="loadBtn" style="
+<button id="fxBtn" style="
 position:absolute;
 top:20px;
 left:20px;
 z-index:10;
-">CUSTOM</button>
+">FX OFF</button>
 
 <input type="file" id="fileInput" accept="audio/*" style="display:none;">
 
@@ -23,8 +23,10 @@ z-index:10;
 let ctx;
 let source;
 let lowFilter, highFilter;
+let distortion;
 let audioBuffer;
-let isPlaying = false;
+let fxEnabled = false;
+let audioLoaded = false;
 
 const canvas = document.getElementById("canvas");
 const c = canvas.getContext("2d");
@@ -43,15 +45,21 @@ function init(){
   }
 }
 
-document.getElementById("loadBtn").onclick = () => {
-  document.getElementById("fileInput").click();
+document.getElementById("fxBtn").onclick = () => {
+  init();
+
+  if(!audioLoaded){
+    document.getElementById("fileInput").click();
+  } else {
+    toggleFX();
+  }
 };
 
 document.getElementById("fileInput").addEventListener("change", async (e)=>{
-  init();
   const file = e.target.files[0];
   const arrayBuffer = await file.arrayBuffer();
   audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+  audioLoaded = true;
   startPlayback();
 });
 
@@ -68,22 +76,45 @@ function startPlayback(){
   highFilter = ctx.createBiquadFilter();
   highFilter.type = "highpass";
 
-  const lowGain = ctx.createGain();
-  const highGain = ctx.createGain();
-
-  lowGain.gain.value = 1;
-  highGain.gain.value = 1;
+  distortion = ctx.createWaveShaper();
+  distortion.curve = makeDistortionCurve(400);
+  distortion.oversample = "4x";
 
   source.connect(lowFilter);
-  lowFilter.connect(lowGain);
-  lowGain.connect(ctx.destination);
-
   source.connect(highFilter);
-  highFilter.connect(highGain);
-  highGain.connect(ctx.destination);
+
+  lowFilter.connect(ctx.destination);
+  highFilter.connect(ctx.destination);
 
   source.start();
-  isPlaying = true;
+}
+
+function toggleFX(){
+  fxEnabled = !fxEnabled;
+  document.getElementById("fxBtn").innerText = fxEnabled ? "FX ON" : "FX OFF";
+
+  if(fxEnabled){
+    highFilter.disconnect();
+    highFilter.connect(distortion);
+    distortion.connect(ctx.destination);
+  } else {
+    highFilter.disconnect();
+    distortion.disconnect();
+    highFilter.connect(ctx.destination);
+  }
+}
+
+function makeDistortionCurve(amount){
+  const n_samples = 44100;
+  const curve = new Float32Array(n_samples);
+  const deg = Math.PI / 180;
+
+  for(let i = 0; i < n_samples; ++i){
+    const x = i * 2 / n_samples - 1;
+    curve[i] = (3 + amount) * x * 20 * deg /
+      (Math.PI + amount * Math.abs(x));
+  }
+  return curve;
 }
 
 let drawing = false;
@@ -106,13 +137,10 @@ function updateSplit(e){
 
   const y = e.clientY;
   const height = canvas.height;
-
   const ratio = 1 - (y / height);
 
-  // Map screen to frequency range
   const minFreq = 100;
   const maxFreq = 8000;
-
   const freq = minFreq + ratio * (maxFreq - minFreq);
 
   lowFilter.frequency.value = freq;
@@ -123,7 +151,7 @@ function updateSplit(e){
 
 function drawLine(y){
   c.clearRect(0,0,canvas.width,canvas.height);
-  c.strokeStyle = "#00aaff";
+  c.strokeStyle = "#ff0066";
   c.lineWidth = 3;
   c.beginPath();
   c.moveTo(0,y);
