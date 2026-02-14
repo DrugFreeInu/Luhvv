@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -42,6 +43,7 @@ html, body {
   height: 30vh;
   border: none;
   z-index: 10;
+  background: transparent;
 }
 
 /* ===== LOWER SECTION ===== */
@@ -52,14 +54,7 @@ html, body {
   z-index: 10;
 }
 
-/* LEFT SLIDERS */
-
-#synth {
-  width: 260px;
-  border: none;
-}
-
-/* RIGHT STACK */
+/* ===== ENGINE STACK ===== */
 
 #engineStack {
   flex: 1;
@@ -67,9 +62,12 @@ html, body {
   flex-direction: column;
 }
 
+/* Transparent iframes */
+
 #wub, #bell {
   flex: 1;
   border: none;
+  background: transparent;
 }
 </style>
 </head>
@@ -82,18 +80,14 @@ html, body {
   <iframe id="beams" src="beams.html"></iframe>
 
   <!-- Top Vocal -->
-  <iframe id="vocal" src="vocal.html"></iframe>
+  <iframe id="vocal" src="vocal.html" allowtransparency="true"></iframe>
 
   <!-- Lower Section -->
   <div id="lowerSection">
 
-    <!-- Sliders -->
-
-
-    <!-- Wub + Bell Stack -->
     <div id="engineStack">
-      <iframe id="wub" src="wub.html"></iframe>
-      <iframe id="bell" src="bell.html"></iframe>
+      <iframe id="wub" src="wub.html" allowtransparency="true"></iframe>
+      <iframe id="bell" src="bell.html" allowtransparency="true"></iframe>
     </div>
 
   </div>
