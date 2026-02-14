@@ -8,17 +8,17 @@
 <style>
 html, body {
   margin: 0;
-  height: 100%;
-  background: transparent !important;
+  background: transparent;
   color: white;
   font-family: system-ui;
+  height: 100%;
 }
 
 /* ===== MAIN LAYOUT ===== */
 
 #layout {
   display: flex;
-  height: 100%; /* IMPORTANT — not 100vh */
+  height: 100vh;
   align-items: center;
   justify-content: center;
   gap: 60px;
@@ -28,21 +28,10 @@ html, body {
 /* ===== SLIDERS COLUMN ===== */
 
 #controls {
-  display: flex;
+  display: none; /* hidden by default */
   flex-direction: column;
   gap: 18px;
   width: 260px;
-}
-
-.controlBlock {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-label {
-  font-size: 12px;
-  letter-spacing: 2px;
 }
 
 input[type=range] {
@@ -52,9 +41,9 @@ input[type=range] {
 /* ===== BELL BUTTON ===== */
 
 #bellBtn {
-  width: 220px;
-  height: 220px;
-  font-size: 28px;
+  width: 160px;
+  height: 60px;
+  font-size: 18px;
   background: transparent;
   border: 2px solid white;
   color: white;
@@ -72,27 +61,11 @@ input[type=range] {
 <div id="layout">
 
   <div id="controls">
-
-    <div class="controlBlock">
-      <input type="range" id="freq" min="150" max="1200" value="440">
-    </div>
-
-    <div class="controlBlock">
-      <input type="range" id="ratio" min="0.5" max="6" step="0.1" value="2.5">
-    </div>
-
-    <div class="controlBlock">
-      <input type="range" id="index" min="0" max="500" value="120">
-    </div>
-
-    <div class="controlBlock">
-      <input type="range" id="decay" min="0.2" max="5" step="0.1" value="2">
-    </div>
-
-    <div class="controlBlock">
-      <input type="range" id="cutoff" min="2000" max="12000" value="9000">
-    </div>
-
+    <input type="range" id="freq" min="150" max="1200" value="440">
+    <input type="range" id="ratio" min="0.5" max="6" step="0.1" value="2.5">
+    <input type="range" id="index" min="0" max="500" value="120">
+    <input type="range" id="decay" min="0.2" max="5" step="0.1" value="2">
+    <input type="range" id="cutoff" min="2000" max="12000" value="9000">
   </div>
 
   <button id="bellBtn">BELL</button>
@@ -101,8 +74,11 @@ input[type=range] {
 
 <script>
 let ctx;
+let controlsVisible = false;
 
 const btn = document.getElementById("bellBtn");
+const controls = document.getElementById("controls");
+
 const freqSlider = document.getElementById("freq");
 const ratioSlider = document.getElementById("ratio");
 const indexSlider = document.getElementById("index");
@@ -113,6 +89,11 @@ function initAudio(){
   if(!ctx){
     ctx = new (window.AudioContext || window.webkitAudioContext)();
   }
+}
+
+function toggleControls(){
+  controlsVisible = !controlsVisible;
+  controls.style.display = controlsVisible ? "flex" : "none";
 }
 
 async function strikeBell(){
@@ -165,6 +146,7 @@ async function strikeBell(){
   modulator.stop(now + decay + 0.3);
 }
 
+btn.addEventListener("click", toggleControls);
 btn.addEventListener("pointerdown", strikeBell);
 </script>
 
