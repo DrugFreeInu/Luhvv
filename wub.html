@@ -11,32 +11,33 @@ html, body {
   background: #000;
   color: white;
   font-family: system-ui;
+  height: 100%;
+}
+
+/* ===== MAIN LAYOUT ===== */
+
+#layout {
   display: flex;
-  flex-direction: column;
+  height: 100vh;
   align-items: center;
+  justify-content: center;
+  gap: 60px;
   padding: 20px;
 }
 
-#wubBtn {
-  width: 90%;
-  max-width: 500px;
-  height: 150px;
-  font-size: 40px;
-  margin-bottom: 30px;
-  background: transparent;
-  border: 2px solid white;
-  color: white;
-  cursor: pointer;
+/* ===== SLIDERS COLUMN ===== */
+
+#controls {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 260px;
 }
 
-#wubBtn:active {
-  background: rgba(255,255,255,0.08);
-}
-
-.control {
-  width: 90%;
-  max-width: 500px;
-  margin-bottom: 15px;
+.controlBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 label {
@@ -47,40 +48,65 @@ label {
 input[type=range] {
   width: 100%;
 }
+
+/* ===== WUB BUTTON ===== */
+
+#wubBtn {
+  width: 220px;
+  height: 220px;
+  font-size: 28px;
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+  cursor: pointer;
+}
+
+#wubBtn:active {
+  background: rgba(255,255,255,0.08);
+}
 </style>
 </head>
+
 <body>
 
-<button id="wubBtn">HOLD WUB</button>
+<div id="layout">
 
-<div class="control">
-  <label>MAIN FREQ</label>
-  <input type="range" id="freq" min="40" max="120" value="55">
-</div>
+  <div id="controls">
 
-<div class="control">
-  <label>SUB LEVEL</label>
-  <input type="range" id="subLevel" min="0" max="1" step="0.01" value="1">
-</div>
+    <div class="controlBlock">
+      <label>MAIN FREQ</label>
+      <input type="range" id="freq" min="40" max="120" value="55">
+    </div>
 
-<div class="control">
-  <label>FILTER CUTOFF</label>
-  <input type="range" id="cutoff" min="100" max="1000" value="300">
-</div>
+    <div class="controlBlock">
+      <label>SUB LEVEL</label>
+      <input type="range" id="subLevel" min="0" max="1" step="0.01" value="1">
+    </div>
 
-<div class="control">
-  <label>FILTER RESONANCE (Q)</label>
-  <input type="range" id="res" min="0.1" max="10" step="0.1" value="1.2">
-</div>
+    <div class="controlBlock">
+      <label>FILTER CUTOFF</label>
+      <input type="range" id="cutoff" min="100" max="1000" value="300">
+    </div>
 
-<div class="control">
-  <label>DETUNE</label>
-  <input type="range" id="detune" min="0" max="30" value="6">
-</div>
+    <div class="controlBlock">
+      <label>FILTER RESONANCE (Q)</label>
+      <input type="range" id="res" min="0.1" max="10" step="0.1" value="1.2">
+    </div>
 
-<div class="control">
-  <label>MASTER GAIN</label>
-  <input type="range" id="gain" min="0" max="1" step="0.01" value="0.8">
+    <div class="controlBlock">
+      <label>DETUNE</label>
+      <input type="range" id="detune" min="0" max="30" value="6">
+    </div>
+
+    <div class="controlBlock">
+      <label>MASTER GAIN</label>
+      <input type="range" id="gain" min="0" max="1" step="0.01" value="0.8">
+    </div>
+
+  </div>
+
+  <button id="wubBtn">HOLD WUB</button>
+
 </div>
 
 <script>
@@ -118,15 +144,7 @@ function startWub(){
   osc2.type = "sawtooth";
   subOsc.type = "sine";
 
-  osc1.frequency.value = freqSlider.value;
-  osc2.frequency.value = freqSlider.value;
-  subOsc.frequency.value = freqSlider.value / 2;
-
-  osc2.detune.value = detuneSlider.value;
-
-  filter.type = "lowpass";
-  filter.frequency.value = cutoffSlider.value;
-  filter.Q.value = resSlider.value;
+  updateParams();
 
   gainNode.gain.value = 0;
 
@@ -160,7 +178,7 @@ function stopWub(){
 }
 
 function updateParams(){
-  if(!isPlaying) return;
+  if(!osc1) return;
 
   osc1.frequency.value = freqSlider.value;
   osc2.frequency.value = freqSlider.value;
