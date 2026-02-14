@@ -70,6 +70,12 @@ button:active {
   gap: 10px;
   font-size: 12px;
   letter-spacing: 2px;
+  opacity: 0.9;
+}
+
+.sliderWrap.disabled {
+  opacity: 0.35;
+  pointer-events: none;
 }
 
 #pitchSlider {
@@ -136,6 +142,12 @@ input[type=range]::-webkit-slider-thumb {
 .presetItem:active {
   transform: scale(0.97);
 }
+
+.presetItem.active {
+  opacity: 1;
+  border-color: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.08);
+}
 </style>
 </head>
 
@@ -148,7 +160,7 @@ input[type=range]::-webkit-slider-thumb {
   <button id="saveBtn" class="unsaved">SAVE</button>
 </div>
 
-<div class="sliderWrap">
+<div class="sliderWrap disabled" id="sliderWrap">
   <label>PITCH</label>
   <input type="range" id="pitchSlider" min="0.5" max="2" step="0.01" value="1">
 
@@ -165,17 +177,21 @@ const saveBtn = document.getElementById("saveBtn");
 const pitchSlider = document.getElementById("pitchSlider");
 const speedSlider = document.getElementById("speedSlider");
 const presetList = document.getElementById("presetList");
+const sliderWrap = document.getElementById("sliderWrap");
 
 let sessionPresets = [];
+let activePresetIndex = -1;
 
 input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    playCurrent();
-  }
+  if (e.key === "Enter") playCurrent();
 });
 
 listenBtn.addEventListener("click", playCurrent);
 saveBtn.addEventListener("click", savePreset);
+
+// Sliders edit ONLY the active preset
+pitchSlider.addEventListener("input", () => updateActivePreset(true));
+speedSlider.addEventListener("input", () => updateActivePreset(true));
 
 function playSpeech(text, pitch, rate) {
   speechSynthesis.cancel();
@@ -189,11 +205,8 @@ function playCurrent() {
   const text = input.value.trim();
   if (!text) return;
 
-  playSpeech(
-    text,
-    parseFloat(pitchSlider.value),
-    parseFloat(speedSlider.value)
-  );
+  // LISTEN uses current slider values (even if sliders are disabled visually)
+  playSpeech(text, parseFloat(pitchSlider.value), parseFloat(speedSlider.value));
 }
 
 function savePreset() {
@@ -201,7 +214,7 @@ function savePreset() {
   if (!text) return;
 
   const preset = {
-    text: text,
+    text,
     pitch: parseFloat(pitchSlider.value),
     speed: parseFloat(speedSlider.value)
   };
@@ -211,25 +224,62 @@ function savePreset() {
   setSaved();
 }
 
+function setActivePreset(index) {
+  activePresetIndex = index;
+
+  // Enable sliders only when a preset is selected
+  sliderWrap.classList.remove("disabled");
+
+  // Load preset params into sliders
+  pitchSlider.value = sessionPresets[index].pitch;
+  speedSlider.value = sessionPresets[index].speed;
+
+  // Highlight active
+  [...presetList.querySelectorAll(".presetItem")].forEach((b, i) => {
+    b.classList.toggle("active", i === index);
+  });
+}
+
+function updateActivePreset(replay) {
+  if (activePresetIndex < 0) return;
+
+  const p = sessionPresets[activePresetIndex];
+  p.pitch = parseFloat(pitchSlider.value);
+  p.speed = parseFloat(speedSlider.value);
+
+  // Update button label live
+  const btns = presetList.querySelectorAll(".presetItem");
+  const btn = btns[activePresetIndex];
+  if (btn) {
+    btn.textContent = `${p.text} (P:${p.pitch.toFixed(2)} S:${p.speed.toFixed(2)})`;
+  }
+
+  if (replay) {
+    playSpeech(p.text, p.pitch, p.speed);
+  }
+}
+
 function renderPresets() {
   presetList.innerHTML = "";
 
-  sessionPresets.forEach((preset) => {
+  sessionPresets.forEach((preset, idx) => {
     const btn = document.createElement("button");
     btn.className = "presetItem";
     btn.textContent = `${preset.text} (P:${preset.pitch.toFixed(2)} S:${preset.speed.toFixed(2)})`;
 
     btn.addEventListener("click", () => {
-      input.value = preset.text;
-      pitchSlider.value = preset.pitch;
-      speedSlider.value = preset.speed;
-
+      setActivePreset(idx);
       playSpeech(preset.text, preset.pitch, preset.speed);
       setSaved();
     });
 
     presetList.appendChild(btn);
   });
+
+  // If we re-rendered and there was an active preset, restore highlight
+  if (activePresetIndex >= 0 && activePresetIndex < sessionPresets.length) {
+    setActivePreset(activePresetIndex);
+  }
 }
 
 function setSaved() {
