@@ -28,21 +28,10 @@ html, body {
 /* ===== SLIDERS COLUMN ===== */
 
 #controls {
-  display: flex;
+  display: none; /* hidden by default */
   flex-direction: column;
   gap: 18px;
   width: 260px;
-}
-
-.controlBlock {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-label {
-  font-size: 12px;
-  letter-spacing: 2px;
 }
 
 input[type=range] {
@@ -52,9 +41,9 @@ input[type=range] {
 /* ===== WUB BUTTON ===== */
 
 #wubBtn {
-  width: 220px;
-  height: 220px;
-  font-size: 28px;
+  width: 160px;
+  height: 60px;
+  font-size: 18px;
   background: transparent;
   border: 2px solid white;
   color: white;
@@ -73,39 +62,16 @@ input[type=range] {
 
   <div id="controls">
 
-    <div class="controlBlock">
-      <label>MAIN FREQ</label>
-      <input type="range" id="freq" min="40" max="120" value="55">
-    </div>
-
-    <div class="controlBlock">
-      <label>SUB LEVEL</label>
-      <input type="range" id="subLevel" min="0" max="1" step="0.01" value="1">
-    </div>
-
-    <div class="controlBlock">
-      <label>FILTER CUTOFF</label>
-      <input type="range" id="cutoff" min="100" max="1000" value="300">
-    </div>
-
-    <div class="controlBlock">
-      <label>FILTER RESONANCE (Q)</label>
-      <input type="range" id="res" min="0.1" max="10" step="0.1" value="1.2">
-    </div>
-
-    <div class="controlBlock">
-      <label>DETUNE</label>
-      <input type="range" id="detune" min="0" max="30" value="6">
-    </div>
-
-    <div class="controlBlock">
-      <label>MASTER GAIN</label>
-      <input type="range" id="gain" min="0" max="1" step="0.01" value="0.8">
-    </div>
+    <input type="range" id="freq" min="40" max="120" value="55">
+    <input type="range" id="subLevel" min="0" max="1" step="0.01" value="1">
+    <input type="range" id="cutoff" min="100" max="1000" value="300">
+    <input type="range" id="res" min="0.1" max="10" step="0.1" value="1.2">
+    <input type="range" id="detune" min="0" max="30" value="6">
+    <input type="range" id="gain" min="0" max="1" step="0.01" value="0.8">
 
   </div>
 
-  <button id="wubBtn">HOLD WUB</button>
+  <button id="wubBtn">WUB</button>
 
 </div>
 
@@ -114,8 +80,10 @@ let ctx;
 let osc1, osc2, subOsc;
 let filter, gainNode;
 let isPlaying = false;
+let controlsVisible = false;
 
 const btn = document.getElementById("wubBtn");
+const controls = document.getElementById("controls");
 
 const freqSlider = document.getElementById("freq");
 const subLevelSlider = document.getElementById("subLevel");
@@ -128,6 +96,11 @@ function initAudio(){
   if(!ctx){
     ctx = new (window.AudioContext || window.webkitAudioContext)();
   }
+}
+
+function toggleControls(){
+  controlsVisible = !controlsVisible;
+  controls.style.display = controlsVisible ? "flex" : "none";
 }
 
 function startWub(){
@@ -196,6 +169,7 @@ document.querySelectorAll("input").forEach(slider=>{
   slider.addEventListener("input", updateParams);
 });
 
+btn.addEventListener("click", toggleControls);
 btn.addEventListener("pointerdown", startWub);
 btn.addEventListener("pointerup", stopWub);
 btn.addEventListener("pointerleave", stopWub);
