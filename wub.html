@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>WUB LAB</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+html, body {
+  margin: 0;
+  background: #000;
+  color: white;
+  font-family: system-ui;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+#wubBtn {
+  width: 90%;
+  max-width: 500px;
+  height: 150px;
+  font-size: 40px;
+  margin-bottom: 30px;
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+  cursor: pointer;
+}
+
+#wubBtn:active {
+  background: rgba(255,255,255,0.08);
+}
+
+.control {
+  width: 90%;
+  max-width: 500px;
+  margin-bottom: 15px;
+}
+
+label {
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+input[type=range] {
+  width: 100%;
+}
+</style>
+</head>
+<body>
+
+<button id="wubBtn">HOLD WUB</button>
+
+<div class="control">
+  <label>MAIN FREQ</label>
+  <input type="range" id="freq" min="40" max="120" value="55">
+</div>
+
+<div class="control">
+  <label>SUB LEVEL</label>
+  <input type="range" id="subLevel" min="0" max="1" step="0.01" value="1">
+</div>
+
+<div class="control">
+  <label>FILTER CUTOFF</label>
+  <input type="range" id="cutoff" min="100" max="1000" value="300">
+</div>
+
+<div class="control">
+  <label>FILTER RESONANCE (Q)</label>
+  <input type="range" id="res" min="0.1" max="10" step="0.1" value="1.2">
+</div>
+
+<div class="control">
+  <label>DETUNE</label>
+  <input type="range" id="detune" min="0" max="30" value="6">
+</div>
+
+<div class="control">
+  <label>MASTER GAIN</label>
+  <input type="range" id="gain" min="0" max="1" step="0.01" value="0.8">
+</div>
+
+<script>
+let ctx;
+let osc1, osc2, subOsc;
+let filter, gainNode;
+let isPlaying = false;
+
+const btn = document.getElementById("wubBtn");
+
+const freqSlider = document.getElementById("freq");
+const subLevelSlider = document.getElementById("subLevel");
+const cutoffSlider = document.getElementById("cutoff");
+const resSlider = document.getElementById("res");
+const detuneSlider = document.getElementById("detune");
+const gainSlider = document.getElementById("gain");
+
+function initAudio(){
+  if(!ctx){
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+
+function startWub(){
+  if(isPlaying) return;
+  initAudio();
+
+  osc1 = ctx.createOscillator();
+  osc2 = ctx.createOscillator();
+  subOsc = ctx.createOscillator();
+  filter = ctx.createBiquadFilter();
+  gainNode = ctx.createGain();
+
+  osc1.type = "sawtooth";
+  osc2.type = "sawtooth";
+  subOsc.type = "sine";
+
+  osc1.frequency.value = freqSlider.value;
+  osc2.frequency.value = freqSlider.value;
+  subOsc.frequency.value = freqSlider.value / 2;
+
+  osc2.detune.value = detuneSlider.value;
+
+  filter.type = "lowpass";
+  filter.frequency.value = cutoffSlider.value;
+  filter.Q.value = resSlider.value;
+
+  gainNode.gain.value = 0;
+
+  osc1.connect(filter);
+  osc2.connect(filter);
+  subOsc.connect(filter);
+
+  filter.connect(gainNode);
+  gainNode.connect(ctx.destination);
+
+  osc1.start();
+  osc2.start();
+  subOsc.start();
+
+  gainNode.gain.linearRampToValueAtTime(gainSlider.value, ctx.currentTime + 0.05);
+
+  isPlaying = true;
+}
+
+function stopWub(){
+  if(!isPlaying) return;
+
+  gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.05);
+
+  setTimeout(()=>{
+    osc1.stop();
+    osc2.stop();
+    subOsc.stop();
+    isPlaying = false;
+  }, 60);
+}
+
+function updateParams(){
+  if(!isPlaying) return;
+
+  osc1.frequency.value = freqSlider.value;
+  osc2.frequency.value = freqSlider.value;
+  subOsc.frequency.value = freqSlider.value / 2;
+
+  osc2.detune.value = detuneSlider.value;
+
+  filter.frequency.value = cutoffSlider.value;
+  filter.Q.value = resSlider.value;
+
+  gainNode.gain.value = gainSlider.value;
+}
+
+document.querySelectorAll("input").forEach(slider=>{
+  slider.addEventListener("input", updateParams);
+});
+
+btn.addEventListener("pointerdown", startWub);
+btn.addEventListener("pointerup", stopWub);
+btn.addEventListener("pointerleave", stopWub);
+btn.addEventListener("touchend", stopWub);
+</script>
+
+</body>
+</html>
