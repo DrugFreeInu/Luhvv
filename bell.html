@@ -11,32 +11,33 @@ html, body {
   background: #000;
   color: white;
   font-family: system-ui;
+  height: 100%;
+}
+
+/* ===== MAIN LAYOUT ===== */
+
+#layout {
   display: flex;
-  flex-direction: column;
+  height: 100vh;
   align-items: center;
+  justify-content: center;
+  gap: 60px;
   padding: 20px;
 }
 
-#bellBtn {
-  width: 90%;
-  max-width: 500px;
-  height: 150px;
-  font-size: 40px;
-  margin-bottom: 30px;
-  background: transparent;
-  border: 2px solid white;
-  color: white;
-  cursor: pointer;
+/* ===== SLIDERS COLUMN ===== */
+
+#controls {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 260px;
 }
 
-#bellBtn:active {
-  background: rgba(255,255,255,0.08);
-}
-
-.control {
-  width: 90%;
-  max-width: 500px;
-  margin-bottom: 15px;
+.controlBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 label {
@@ -47,35 +48,60 @@ label {
 input[type=range] {
   width: 100%;
 }
+
+/* ===== BELL BUTTON ===== */
+
+#bellBtn {
+  width: 220px;
+  height: 220px;
+  font-size: 28px;
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+  cursor: pointer;
+}
+
+#bellBtn:active {
+  background: rgba(255,255,255,0.08);
+}
 </style>
 </head>
+
 <body>
 
-<button id="bellBtn">STRIKE BELL</button>
+<div id="layout">
 
-<div class="control">
-  <label>FUNDAMENTAL FREQ</label>
-  <input type="range" id="freq" min="150" max="1200" value="440">
-</div>
+  <div id="controls">
 
-<div class="control">
-  <label>FM RATIO</label>
-  <input type="range" id="ratio" min="0.5" max="6" step="0.1" value="2.5">
-</div>
+    <div class="controlBlock">
+      <label>FUNDAMENTAL FREQ</label>
+      <input type="range" id="freq" min="150" max="1200" value="440">
+    </div>
 
-<div class="control">
-  <label>MODULATION INDEX</label>
-  <input type="range" id="index" min="0" max="500" value="120">
-</div>
+    <div class="controlBlock">
+      <label>FM RATIO</label>
+      <input type="range" id="ratio" min="0.5" max="6" step="0.1" value="2.5">
+    </div>
 
-<div class="control">
-  <label>DECAY (SECONDS)</label>
-  <input type="range" id="decay" min="0.2" max="5" step="0.1" value="2">
-</div>
+    <div class="controlBlock">
+      <label>MODULATION INDEX</label>
+      <input type="range" id="index" min="0" max="500" value="120">
+    </div>
 
-<div class="control">
-  <label>FILTER CUTOFF</label>
-  <input type="range" id="cutoff" min="2000" max="12000" value="9000">
+    <div class="controlBlock">
+      <label>DECAY (SECONDS)</label>
+      <input type="range" id="decay" min="0.2" max="5" step="0.1" value="2">
+    </div>
+
+    <div class="controlBlock">
+      <label>FILTER CUTOFF</label>
+      <input type="range" id="cutoff" min="2000" max="12000" value="9000">
+    </div>
+
+  </div>
+
+  <button id="bellBtn">STRIKE BELL</button>
+
 </div>
 
 <script>
@@ -118,14 +144,12 @@ async function strikeBell(){
   carrier.frequency.value = baseFreq;
   modulator.frequency.value = baseFreq * ratio;
 
-  // Safer modulation depth
   modGain.gain.value = index;
 
   filter.type = "lowpass";
   filter.frequency.value = cutoffSlider.value;
   filter.Q.value = 0.7;
 
-  // FM routing
   modulator.connect(modGain);
   modGain.connect(carrier.frequency);
 
@@ -135,11 +159,8 @@ async function strikeBell(){
 
   const now = ctx.currentTime;
 
-  // Soft attack
   gainNode.gain.setValueAtTime(0, now);
   gainNode.gain.linearRampToValueAtTime(1, now + 0.01);
-
-  // Natural decay
   gainNode.gain.exponentialRampToValueAtTime(0.001, now + decay);
 
   carrier.start(now);
