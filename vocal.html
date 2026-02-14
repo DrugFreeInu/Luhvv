@@ -170,19 +170,26 @@ input.addEventListener("keydown", (e) => {
 listenBtn.addEventListener("click", playCurrent);
 saveBtn.addEventListener("click", savePreset);
 
-function playCurrent() {
-  const text = input.value.trim();
-  if (!text) return;
-
+function playSpeech(text, pitch, rate) {
   speechSynthesis.cancel();
-
   const utter = new SpeechSynthesisUtterance(text);
-  utter.pitch = parseFloat(pitchSlider.value);
-  utter.rate = parseFloat(speedSlider.value);
+  utter.pitch = pitch;
+  utter.rate = rate;
 
   setTimeout(() => {
     speechSynthesis.speak(utter);
   }, 30);
+}
+
+function playCurrent() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  playSpeech(
+    text,
+    parseFloat(pitchSlider.value),
+    parseFloat(speedSlider.value)
+  );
 }
 
 function savePreset() {
@@ -212,6 +219,10 @@ function renderPresets() {
       input.value = preset.text;
       pitchSlider.value = preset.pitch;
       speedSlider.value = preset.speed;
+
+      // 🔥 Immediately play when tapped
+      playSpeech(preset.text, preset.pitch, preset.speed);
+
       setSaved();
     });
 
