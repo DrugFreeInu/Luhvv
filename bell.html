@@ -8,17 +8,17 @@
 <style>
 html, body {
   margin: 0;
-  background: #000;
+  height: 100%;
+  background: transparent !important;
   color: white;
   font-family: system-ui;
-  height: 100%;
 }
 
 /* ===== MAIN LAYOUT ===== */
 
 #layout {
   display: flex;
-  height: 100vh;
+  height: 100%; /* IMPORTANT — not 100vh */
   align-items: center;
   justify-content: center;
   gap: 60px;
@@ -74,33 +74,28 @@ input[type=range] {
   <div id="controls">
 
     <div class="controlBlock">
-      <label>FUNDAMENTAL FREQ</label>
       <input type="range" id="freq" min="150" max="1200" value="440">
     </div>
 
     <div class="controlBlock">
-      <label>FM RATIO</label>
       <input type="range" id="ratio" min="0.5" max="6" step="0.1" value="2.5">
     </div>
 
     <div class="controlBlock">
-      <label>MODULATION INDEX</label>
       <input type="range" id="index" min="0" max="500" value="120">
     </div>
 
     <div class="controlBlock">
-      <label>DECAY (SECONDS)</label>
       <input type="range" id="decay" min="0.2" max="5" step="0.1" value="2">
     </div>
 
     <div class="controlBlock">
-      <label>FILTER CUTOFF</label>
       <input type="range" id="cutoff" min="2000" max="12000" value="9000">
     </div>
 
   </div>
 
-  <button id="bellBtn">STRIKE BELL</button>
+  <button id="bellBtn">BELL</button>
 
 </div>
 
