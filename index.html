@@ -10,18 +10,21 @@ html, body {
   margin: 0;
   height: 100%;
   background: transparent;
-  overflow: hidden;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+/* ===== MAIN GRID ===== */
+
 #app {
-  position: relative;
-  width: 100vw;
+  display: flex;
+  flex-direction: column;
   height: 100vh;
-  background: transparent;
+  width: 100vw;
+  position: relative;
 }
 
-/* ===== Background Layer ===== */
+/* ===== BACKGROUND ===== */
+
 #beams {
   position: absolute;
   inset: 0;
@@ -32,77 +35,41 @@ html, body {
   pointer-events: none;
 }
 
-/* ===== Core Layers ===== */
+/* ===== TOP VOCAL ===== */
+
 #vocal {
-  position: absolute;
-  top: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  max-width: 600px;
-  height: 70vh;
+  width: 100%;
+  height: 30vh;
   border: none;
   z-index: 10;
-  background: transparent;
 }
 
-#scrubber {
-  position: absolute;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  max-width: 700px;
-  height: 120px;
-  border: none;
-  z-index: 5;
-  background: transparent;
+/* ===== LOWER SECTION ===== */
+
+#lowerSection {
+  flex: 1;
+  display: flex;
+  z-index: 10;
 }
 
-/* ===== FX Modules (Side Dock Layout Example) ===== */
-
-#modify {
-  position: absolute;
-  top: 10%;
-  right: 20px;
-  width: 260px;
-  height: 180px;
-  border: none;
-  z-index: 20;
-  background: transparent;
-}
-
-#fade {
-  position: absolute;
-  top: 200px;
-  right: 20px;
-  width: 260px;
-  height: 180px;
-  border: none;
-  z-index: 21;
-  background: transparent;
-}
-
-#length {
-  position: absolute;
-  top: 390px;
-  right: 20px;
-  width: 260px;
-  height: 150px;
-  border: none;
-  z-index: 22;
-  background: transparent;
-}
+/* LEFT SLIDERS */
 
 #synth {
-  position: absolute;
-  bottom: 200px;
-  left: 20px;
   width: 260px;
-  height: 150px;
   border: none;
-  z-index: 25;
-  background: transparent;
+}
+
+/* RIGHT STACK */
+
+#engineStack {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#wub, #bell {
+  flex: 1;
+  border: none;
 }
 </style>
 </head>
@@ -112,14 +79,24 @@ html, body {
 <div id="app">
 
   <!-- Background -->
-  <iframe id="beams" src="beams.html" allowtransparency="true"></iframe>
+  <iframe id="beams" src="beams.html"></iframe>
 
-  <!-- Core -->
- <iframe id="vocal" src="vocal.html"></iframe>
-  <iframe id="scrubber" src="scrubber.html" allowtransparency="true"></iframe>
+  <!-- Top Vocal -->
+  <iframe id="vocal" src="vocal.html"></iframe>
 
-  <!-- FX Modules -->
-  <iframe id="synth" src="synth.html" allowtransparency="true"></iframe>
+  <!-- Lower Section -->
+  <div id="lowerSection">
+
+    <!-- Sliders -->
+    <iframe id="synth" src="synth.html"></iframe>
+
+    <!-- Wub + Bell Stack -->
+    <div id="engineStack">
+      <iframe id="wub" src="wub.html"></iframe>
+      <iframe id="bell" src="bell.html"></iframe>
+    </div>
+
+  </div>
 
 </div>
 
