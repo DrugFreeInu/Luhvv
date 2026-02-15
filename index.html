@@ -94,8 +94,10 @@ html, body {
 
   <div id="lowerSection">
 
+    <!-- LEFT PANEL -->
     <iframe id="sliderPanel"></iframe>
 
+    <!-- RIGHT BUTTONS -->
     <div id="engineRail">
       <iframe id="wub" src="wub.html" allowtransparency="true"></iframe>
       <iframe id="bell" src="bell.html" allowtransparency="true"></iframe>
@@ -124,12 +126,15 @@ function togglePanel(src){
 
 /* Listen for messages from engine files */
 window.addEventListener("message", (e) => {
+
   if(e.data === "openWub"){
-    togglePanel("wub.html");
+    togglePanel("wubControls.html");   // <-- FIXED
   }
+
   if(e.data === "openBell"){
-    togglePanel("bell.html");
+    togglePanel("bellControls.html");  // <-- FIXED
   }
+
 });
 </script>
 
