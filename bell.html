@@ -37,7 +37,6 @@ html, body {
 
 <script>
 let ctx;
-let controlsOpened = false; // 🔒 one-time flag
 
 let params = {
   freq: 675,
@@ -62,11 +61,8 @@ async function strikeBell(){
     await ctx.resume();
   }
 
-  // 🔓 Open controls only once
-  if (!controlsOpened) {
-    window.parent.postMessage("openBell", "*");
-    controlsOpened = true;
-  }
+  // ✅ Keep this — needed to open panel
+  window.parent.postMessage("openBell", "*");
 
   const carrier = ctx.createOscillator();
   const modulator = ctx.createOscillator();
