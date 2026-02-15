@@ -44,10 +44,6 @@ html, body {
 #lowerSection {
   flex: 1;
   position: relative;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding-right: 80px;
   z-index: 10;
 }
 
@@ -64,8 +60,11 @@ html, body {
   z-index: 20;
 }
 
-/* Right button rail */
+/* === UPDATED BUTTON POSITION === */
 #engineRail {
+  position: absolute;
+  right: 80px;   /* horizontal distance from right edge */
+  top: 140px;    /* vertical placement (adjust this to fine tune) */
   display: flex;
   flex-direction: column;
   gap: 14px;
