@@ -11,24 +11,21 @@ html, body {
   background: transparent;
   color: white;
   font-family: system-ui;
-  height: 100%;
 }
 
-/* ===== MAIN LAYOUT ===== */
-
+/* Main layout */
 #layout {
   display: flex;
-  height: 100vh;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 60px;
+  gap: 20px;
   padding: 20px;
 }
 
-/* ===== SLIDERS COLUMN ===== */
-
+/* Sliders */
 #controls {
-  display: none; /* hidden by default */
+  display: flex;
   flex-direction: column;
   gap: 18px;
   width: 260px;
@@ -38,8 +35,7 @@ input[type=range] {
   width: 100%;
 }
 
-/* ===== WUB BUTTON ===== */
-
+/* WUB Button */
 #wubBtn {
   width: 160px;
   height: 60px;
@@ -60,6 +56,8 @@ input[type=range] {
 
 <div id="layout">
 
+  <button id="wubBtn">WUB</button>
+
   <div id="controls">
 
     <input type="range" id="freq" min="40" max="120" value="55">
@@ -71,8 +69,6 @@ input[type=range] {
 
   </div>
 
-  <button id="wubBtn">WUB</button>
-
 </div>
 
 <script>
@@ -80,10 +76,8 @@ let ctx;
 let osc1, osc2, subOsc;
 let filter, gainNode;
 let isPlaying = false;
-let controlsVisible = false;
 
 const btn = document.getElementById("wubBtn");
-const controls = document.getElementById("controls");
 
 const freqSlider = document.getElementById("freq");
 const subLevelSlider = document.getElementById("subLevel");
@@ -98,14 +92,12 @@ function initAudio(){
   }
 }
 
-function toggleControls(){
-  controlsVisible = !controlsVisible;
-  controls.style.display = controlsVisible ? "flex" : "none";
-}
-
 function startWub(){
   if(isPlaying) return;
   initAudio();
+
+  // Tell parent to open slider panel
+  window.parent.postMessage("openWub", "*");
 
   osc1 = ctx.createOscillator();
   osc2 = ctx.createOscillator();
@@ -169,7 +161,6 @@ document.querySelectorAll("input").forEach(slider=>{
   slider.addEventListener("input", updateParams);
 });
 
-btn.addEventListener("click", toggleControls);
 btn.addEventListener("pointerdown", startWub);
 btn.addEventListener("pointerup", stopWub);
 btn.addEventListener("pointerleave", stopWub);
