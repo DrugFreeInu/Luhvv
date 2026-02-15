@@ -2,40 +2,19 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>BELL LAB</title>
+<title>BELL</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 html, body {
   margin: 0;
   background: transparent;
-  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: system-ui;
 }
 
-/* Main layout */
-#layout {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  padding: 20px;
-}
-
-/* Sliders */
-#controls {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  width: 260px;
-}
-
-input[type=range] {
-  width: 100%;
-}
-
-/* Bell button */
 #bellBtn {
   width: 160px;
   height: 60px;
@@ -54,30 +33,12 @@ input[type=range] {
 
 <body>
 
-<div id="layout">
-
-  <button id="bellBtn">BELL</button>
-
-  <div id="controls">
-    <input type="range" id="freq" min="150" max="1200" value="440">
-    <input type="range" id="ratio" min="0.5" max="6" step="0.1" value="2.5">
-    <input type="range" id="index" min="0" max="500" value="120">
-    <input type="range" id="decay" min="0.2" max="5" step="0.1" value="2">
-    <input type="range" id="cutoff" min="2000" max="12000" value="9000">
-  </div>
-
-</div>
+<button id="bellBtn">BELL</button>
 
 <script>
 let ctx;
 
 const btn = document.getElementById("bellBtn");
-
-const freqSlider = document.getElementById("freq");
-const ratioSlider = document.getElementById("ratio");
-const indexSlider = document.getElementById("index");
-const decaySlider = document.getElementById("decay");
-const cutoffSlider = document.getElementById("cutoff");
 
 function initAudio(){
   if(!ctx){
@@ -88,7 +49,7 @@ function initAudio(){
 async function strikeBell(){
   initAudio();
 
-  // Tell parent to open panel
+  // Tell parent to open bell controls panel
   window.parent.postMessage("openBell", "*");
 
   if (ctx.state === "suspended") {
@@ -101,10 +62,11 @@ async function strikeBell(){
   const filter = ctx.createBiquadFilter();
   const gainNode = ctx.createGain();
 
-  const baseFreq = parseFloat(freqSlider.value);
-  const ratio = parseFloat(ratioSlider.value);
-  const index = parseFloat(indexSlider.value);
-  const decay = parseFloat(decaySlider.value);
+  // Default values (controls now live elsewhere)
+  const baseFreq = 440;
+  const ratio = 2.5;
+  const index = 120;
+  const decay = 2;
 
   carrier.type = "sine";
   modulator.type = "sine";
@@ -115,7 +77,7 @@ async function strikeBell(){
   modGain.gain.value = index;
 
   filter.type = "lowpass";
-  filter.frequency.value = cutoffSlider.value;
+  filter.frequency.value = 9000;
   filter.Q.value = 0.7;
 
   modulator.connect(modGain);
