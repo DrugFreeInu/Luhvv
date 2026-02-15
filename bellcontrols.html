@@ -27,14 +27,6 @@ body {
   width: 260px;
 }
 
-button {
-  padding: 8px;
-  border: none;
-  background: #222;
-  color: white;
-  cursor: pointer;
-}
-
 input[type=range] {
   width: 100%;
   appearance: none;
@@ -73,40 +65,11 @@ input[type=range]::-moz-range-thumb {
   <input type="range" id="decay" min="0.2" max="5" step="0.1" value="2.6">
   <input type="range" id="cutoff" min="2000" max="12000" value="7000">
 
-  <button id="reset">RESET</button>
-
 </div>
 
 <script>
-const sliders = document.querySelectorAll("input[type=range]");
-
-/* Load saved values */
-sliders.forEach(slider => {
-  const saved = localStorage.getItem(slider.id);
-  if (saved !== null) {
-    slider.value = saved;
-  }
-});
-
-/* Save on change + send message */
-sliders.forEach(slider => {
+document.querySelectorAll("input").forEach(slider => {
   slider.addEventListener("input", () => {
-    localStorage.setItem(slider.id, slider.value);
-
-    window.parent.postMessage({
-      type: "bellParam",
-      param: slider.id,
-      value: slider.value
-    }, "*");
-  });
-});
-
-/* Reset button */
-document.getElementById("reset").addEventListener("click", () => {
-  sliders.forEach(slider => {
-    slider.value = (Number(slider.min) + Number(slider.max)) / 2;
-    localStorage.removeItem(slider.id);
-
     window.parent.postMessage({
       type: "bellParam",
       param: slider.id,
