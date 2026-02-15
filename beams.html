@@ -9,7 +9,7 @@
 html, body {
   margin: 0;
   height: 100%;
-  background: transparent; /* IMPORTANT */
+  background: transparent;
   overflow: hidden;
 }
 
@@ -40,6 +40,8 @@ html, body {
     rgba(160,0,80,0.5) 6deg,
     transparent 12deg
   );
+  animation: sweep1 3s ease-in-out infinite alternate,
+             hueShift 14s linear infinite;
 }
 
 .beam2 {
@@ -49,6 +51,8 @@ html, body {
     rgba(0,120,160,0.5) 6deg,
     transparent 12deg
   );
+  animation: sweep2 4s ease-in-out infinite alternate,
+             hueShift 18s linear infinite;
 }
 
 .beam3 {
@@ -58,44 +62,8 @@ html, body {
     rgba(150,110,0,0.5) 6deg,
     transparent 12deg
   );
-}
-
-/* ===== SMOOTH MODE ===== */
-.smooth .beam1 {
-  animation: sweep1 3s ease-in-out infinite alternate,
-             hueShift 14s linear infinite;
-}
-.smooth .beam2 {
-  animation: sweep2 4s ease-in-out infinite alternate,
-             hueShift 18s linear infinite;
-}
-.smooth .beam3 {
   animation: sweep3 5s ease-in-out infinite alternate,
              hueShift 22s linear infinite;
-}
-
-/* ===== LAG MODE ===== */
-.lag .beam1 {
-  animation: sweep1 3s steps(10) infinite alternate,
-             hueShift 14s linear infinite;
-}
-.lag .beam2 {
-  animation: sweep2 4s steps(12) infinite alternate,
-             hueShift 18s linear infinite;
-}
-.lag .beam3 {
-  animation: sweep3 5s steps(14) infinite alternate,
-             hueShift 22s linear infinite;
-}
-
-.lag::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  backdrop-filter: blur(12px);
-  opacity: 0.6;
-  animation: jitter 0.12s infinite;
-  pointer-events: none;
 }
 
 @keyframes sweep1 {
@@ -117,30 +85,16 @@ html, body {
   0%   { filter: blur(60px) saturate(90%) hue-rotate(0deg); }
   100% { filter: blur(60px) saturate(90%) hue-rotate(360deg); }
 }
-
-@keyframes jitter {
-  0%   { transform: translate(0px,0px); }
-  25%  { transform: translate(1px,-1px); }
-  50%  { transform: translate(-1px,1px); }
-  75%  { transform: translate(1px,1px); }
-  100% { transform: translate(0px,0px); }
-}
 </style>
 </head>
 
 <body>
 
-<div class="stage" id="stage">
+<div class="stage">
   <div class="beam beam1"></div>
   <div class="beam beam2"></div>
   <div class="beam beam3"></div>
 </div>
-
-<script>
-const stage = document.getElementById("stage");
-const randomMode = Math.random() < 0.5 ? "smooth" : "lag";
-stage.classList.add(randomMode);
-</script>
 
 </body>
 </html>
