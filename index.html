@@ -47,7 +47,7 @@ html, body {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding-right: 40px;
+  padding-right: 80px; /* increased separation */
   z-index: 10;
 }
 
@@ -57,7 +57,7 @@ html, body {
   left: 40px;
   top: 50%;
   transform: translateY(-50%);
-  width: 340px;
+  width: 280px; /* reduced width to avoid overlap */
   height: 70%;
   border: none;
   background: transparent;
@@ -109,6 +109,8 @@ html, body {
 
 <script>
 const sliderPanel = document.getElementById("sliderPanel");
+const wubFrame = document.getElementById("wub");
+const bellFrame = document.getElementById("bell");
 
 let currentPanel = null;
 
@@ -124,15 +126,26 @@ function togglePanel(src){
   currentPanel = src;
 }
 
-/* Listen for messages from engine files */
+/* Listen for messages from engine files AND controls */
 window.addEventListener("message", (e) => {
 
+  // Open control panels
   if(e.data === "openWub"){
-    togglePanel("wubcontrols.html");   // lowercase
+    togglePanel("wubcontrols.html");
   }
 
   if(e.data === "openBell"){
-    togglePanel("bellcontrols.html");  // lowercase
+    togglePanel("bellcontrols.html");
+  }
+
+  // Forward WUB slider updates to wub iframe
+  if(e.data.type === "wubParam"){
+    wubFrame.contentWindow.postMessage(e.data, "*");
+  }
+
+  // Forward BELL slider updates to bell iframe
+  if(e.data.type === "bellParam"){
+    bellFrame.contentWindow.postMessage(e.data, "*");
   }
 
 });
