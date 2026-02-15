@@ -9,7 +9,7 @@
 html, body {
   margin: 0;
   height: 100%;
-  background: #000; /* Base black lives here */
+  background: #000;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
@@ -21,7 +21,7 @@ html, body {
   position: relative;
 }
 
-/* Background */
+/* Background beams */
 #beams {
   position: absolute;
   inset: 0;
@@ -32,7 +32,7 @@ html, body {
   pointer-events: none;
 }
 
-/* Top Vocal */
+/* Vocal area (top) */
 #vocal {
   width: 100%;
   height: 30vh;
@@ -41,21 +41,27 @@ html, body {
   background: transparent;
 }
 
-/* Lower Section */
+/* Lower layout */
 #lowerSection {
   flex: 1;
   display: flex;
+  justify-content: flex-end;   /* Push everything right */
+  align-items: center;
+  padding-right: 40px;
   z-index: 10;
 }
 
+/* Button stack (right side column) */
 #engineStack {
-  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 20px;        /* tight spacing */
 }
 
+/* Individual engine frames */
 #wub, #bell {
-  flex: 1;
+  width: 220px;
+  height: 140px;
   border: none;
   background: transparent;
 }
