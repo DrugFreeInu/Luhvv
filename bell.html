@@ -37,8 +37,8 @@ html, body {
 
 <script>
 let ctx;
+let controlsOpened = false; // 🔒 one-time flag
 
-/* PARAM STATE — MATCHES SLIDER MIDPOINTS */
 let params = {
   freq: 675,
   ratio: 3.25,
@@ -60,6 +60,12 @@ async function strikeBell(){
 
   if (ctx.state === "suspended") {
     await ctx.resume();
+  }
+
+  // 🔓 Open controls only once
+  if (!controlsOpened) {
+    window.parent.postMessage("openBell", "*");
+    controlsOpened = true;
   }
 
   const carrier = ctx.createOscillator();
@@ -100,7 +106,6 @@ async function strikeBell(){
   modulator.stop(now + params.decay + 0.3);
 }
 
-/* Listen for slider updates */
 window.addEventListener("message", (e) => {
   if(e.data.type === "bellParam"){
     params[e.data.param] = parseFloat(e.data.value);
