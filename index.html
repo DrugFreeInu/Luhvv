@@ -11,6 +11,7 @@ html, body {
   height: 100%;
   background: #000;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden;
 }
 
 #app {
@@ -42,28 +43,35 @@ html, body {
 /* Lower main area */
 #lowerSection {
   flex: 1;
+  position: relative;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  padding: 0 40px;
+  padding-right: 40px;
   z-index: 10;
 }
 
-/* LEFT SLIDER PANEL */
+/* Floating slider panel */
 #sliderPanel {
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 340px;
   height: 70%;
   border: none;
   background: transparent;
-  display: none; /* hidden by default */
+  display: none;
+  z-index: 20;
 }
 
-/* RIGHT BUTTON RAIL */
+/* Right button rail */
 #engineRail {
   display: flex;
   flex-direction: column;
-  gap: 12px; /* tighter spacing */
+  gap: 14px;
   align-items: flex-end;
+  z-index: 30;
 }
 
 /* Button iframes */
@@ -86,10 +94,8 @@ html, body {
 
   <div id="lowerSection">
 
-    <!-- LEFT: dynamic slider panel -->
     <iframe id="sliderPanel"></iframe>
 
-    <!-- RIGHT: engine buttons -->
     <div id="engineRail">
       <iframe id="wub" src="wub.html" allowtransparency="true"></iframe>
       <iframe id="bell" src="bell.html" allowtransparency="true"></iframe>
@@ -97,26 +103,33 @@ html, body {
 
   </div>
 
-</div>no
+</div>
 
 <script>
 const sliderPanel = document.getElementById("sliderPanel");
-const wubFrame = document.getElementById("wub");
-const bellFrame = document.getElementById("bell");
 
-function showPanel(src){
+let currentPanel = null;
+
+function togglePanel(src){
+  if(currentPanel === src){
+    sliderPanel.style.display = "none";
+    currentPanel = null;
+    return;
+  }
+
   sliderPanel.src = src;
   sliderPanel.style.display = "block";
+  currentPanel = src;
 }
 
-/* When WUB iframe is clicked */
-wubFrame.addEventListener("click", () => {
-  showPanel("wub.html");
-});
-
-/* When BELL iframe is clicked */
-bellFrame.addEventListener("click", () => {
-  showPanel("bell.html");
+/* Listen for messages from engine files */
+window.addEventListener("message", (e) => {
+  if(e.data === "openWub"){
+    togglePanel("wub.html");
+  }
+  if(e.data === "openBell"){
+    togglePanel("bell.html");
+  }
 });
 </script>
 
