@@ -16,9 +16,9 @@ html, body {
 }
 
 #bellBtn {
-  width: 220px;
-  height: 220px;
-  font-size: 28px;
+  width: 160px;
+  height: 60px;
+  font-size: 18px;
   background: transparent;
   border: 2px solid white;
   color: white;
@@ -33,12 +33,12 @@ html, body {
 
 <body>
 
-<button id="bellBtn">STRIKE BELL</button>
+<button id="bellBtn">BELL</button>
 
 <script>
 let ctx;
 
-/* Parameter state (same defaults as original sliders) */
+/* PARAM STATE (matches old slider defaults) */
 let params = {
   freq: 440,
   ratio: 2.5,
@@ -62,7 +62,7 @@ async function strikeBell(){
     await ctx.resume();
   }
 
-  // Open control panel
+  // Tell parent to open controls
   window.parent.postMessage("openBell", "*");
 
   const carrier = ctx.createOscillator();
@@ -74,6 +74,7 @@ async function strikeBell(){
   carrier.type = "sine";
   modulator.type = "sine";
 
+  /* Use stored params */
   carrier.frequency.value = params.freq;
   modulator.frequency.value = params.freq * params.ratio;
 
@@ -103,7 +104,7 @@ async function strikeBell(){
   modulator.stop(now + params.decay + 0.3);
 }
 
-/* Listen for slider updates from parent */
+/* Listen for slider updates */
 window.addEventListener("message", (e) => {
   if(e.data.type === "bellParam"){
     params[e.data.param] = parseFloat(e.data.value);
