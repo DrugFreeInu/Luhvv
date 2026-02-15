@@ -47,7 +47,7 @@ html, body {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding-right: 80px; /* increased separation */
+  padding-right: 80px; /* more space from panel */
   z-index: 10;
 }
 
@@ -55,10 +55,9 @@ html, body {
 #sliderPanel {
   position: absolute;
   left: 40px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 280px; /* reduced width to avoid overlap */
-  height: 70%;
+  top: 120px;          /* pin under vocal section */
+  width: 280px;        /* smaller so no overlap */
+  height: auto;        /* no forced height */
   border: none;
   background: transparent;
   display: none;
@@ -94,10 +93,8 @@ html, body {
 
   <div id="lowerSection">
 
-    <!-- LEFT PANEL -->
     <iframe id="sliderPanel"></iframe>
 
-    <!-- RIGHT BUTTONS -->
     <div id="engineRail">
       <iframe id="wub" src="wub.html" allowtransparency="true"></iframe>
       <iframe id="bell" src="bell.html" allowtransparency="true"></iframe>
@@ -114,22 +111,16 @@ const bellFrame = document.getElementById("bell");
 
 let currentPanel = null;
 
+/* DO NOT auto-close panel */
 function togglePanel(src){
-  if(currentPanel === src){
-    sliderPanel.style.display = "none";
-    currentPanel = null;
-    return;
-  }
-
   sliderPanel.src = src;
   sliderPanel.style.display = "block";
   currentPanel = src;
 }
 
-/* Listen for messages from engine files AND controls */
 window.addEventListener("message", (e) => {
 
-  // Open control panels
+  // Open panels
   if(e.data === "openWub"){
     togglePanel("wubcontrols.html");
   }
@@ -138,12 +129,12 @@ window.addEventListener("message", (e) => {
     togglePanel("bellcontrols.html");
   }
 
-  // Forward WUB slider updates to wub iframe
+  // Forward WUB slider updates
   if(e.data.type === "wubParam"){
     wubFrame.contentWindow.postMessage(e.data, "*");
   }
 
-  // Forward BELL slider updates to bell iframe
+  // Forward BELL slider updates
   if(e.data.type === "bellParam"){
     bellFrame.contentWindow.postMessage(e.data, "*");
   }
