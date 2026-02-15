@@ -38,7 +38,7 @@ html, body {
 <script>
 let ctx;
 
-/* PARAM STATE — NOW MATCHES SLIDER MIDPOINTS */
+/* PARAM STATE — MATCHES SLIDER MIDPOINTS */
 let params = {
   freq: 675,
   ratio: 3.25,
@@ -62,9 +62,6 @@ async function strikeBell(){
     await ctx.resume();
   }
 
-  // Tell parent to open controls
-  window.parent.postMessage("openBell", "*");
-
   const carrier = ctx.createOscillator();
   const modulator = ctx.createOscillator();
   const modGain = ctx.createGain();
@@ -74,7 +71,6 @@ async function strikeBell(){
   carrier.type = "sine";
   modulator.type = "sine";
 
-  /* Use stored params */
   carrier.frequency.value = params.freq;
   modulator.frequency.value = params.freq * params.ratio;
 
