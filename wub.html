@@ -37,6 +37,18 @@ html, body {
 
 <script>
 let ctx;
+let osc1, osc2, subOsc;
+let filter, gainNode;
+let isPlaying = false;
+
+/* Default parameter state */
+let params = {
+  freq: 55,
+  cutoff: 300,
+  res: 1.2,
+  detune: 6,
+  gain: 0.8
+};
 
 const btn = document.getElementById("wubBtn");
 
@@ -47,30 +59,75 @@ function initAudio(){
 }
 
 function startWub(){
+  if(isPlaying) return;
+
   initAudio();
 
-  // Tell parent to open controls
+  // Open control panel
   window.parent.postMessage("openWub", "*");
 
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
+  osc1 = ctx.createOscillator();
+  osc2 = ctx.createOscillator();
+  subOsc = ctx.createOscillator();
+  filter = ctx.createBiquadFilter();
+  gainNode = ctx.createGain();
 
-  osc.type = "sawtooth";
-  osc.frequency.value = 55;
+  osc1.type = "sawtooth";
+  osc2.type = "sawtooth";
+  subOsc.type = "sine";
 
-  gain.gain.value = 0;
-  osc.connect(gain);
-  gain.connect(ctx.destination);
+  osc1.connect(filter);
+  osc2.connect(filter);
+  subOsc.connect(filter);
+  filter.connect(gainNode);
+  gainNode.connect(ctx.destination);
 
-  const now = ctx.currentTime;
+  osc1.start();
+  osc2.start();
+  subOsc.start();
 
-  osc.start(now);
-  gain.gain.linearRampToValueAtTime(0.8, now + 0.05);
-  gain.gain.linearRampToValueAtTime(0, now + 0.6);
-  osc.stop(now + 0.6);
+  isPlaying = true;
+
+  updateAudio();
 }
 
+function stopWub(){
+  if(!isPlaying) return;
+
+  osc1.stop();
+  osc2.stop();
+  subOsc.stop();
+  isPlaying = false;
+}
+
+function updateAudio(){
+  if(!isPlaying) return;
+
+  osc1.frequency.value = params.freq;
+  osc2.frequency.value = params.freq;
+  subOsc.frequency.value = params.freq / 2;
+
+  osc2.detune.value = params.detune;
+
+  filter.type = "lowpass";
+  filter.frequency.value = params.cutoff;
+  filter.Q.value = params.res;
+
+  gainNode.gain.value = params.gain;
+}
+
+/* Listen for slider messages from parent */
+window.addEventListener("message", (e) => {
+  if(e.data.type === "wubParam"){
+    params[e.data.param] = parseFloat(e.data.value);
+    updateAudio();
+  }
+});
+
 btn.addEventListener("pointerdown", startWub);
+btn.addEventListener("pointerup", stopWub);
+btn.addEventListener("pointerleave", stopWub);
+btn.addEventListener("touchend", stopWub);
 </script>
 
 </body>
