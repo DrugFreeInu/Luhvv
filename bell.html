@@ -16,9 +16,9 @@ html, body {
 }
 
 #bellBtn {
-  width: 160px;
-  height: 60px;
-  font-size: 18px;
+  width: 220px;
+  height: 220px;
+  font-size: 28px;
   background: transparent;
   border: 2px solid white;
   color: white;
@@ -33,10 +33,19 @@ html, body {
 
 <body>
 
-<button id="bellBtn">BELL</button>
+<button id="bellBtn">STRIKE BELL</button>
 
 <script>
 let ctx;
+
+/* Parameter state (same defaults as original sliders) */
+let params = {
+  freq: 440,
+  ratio: 2.5,
+  index: 120,
+  decay: 2,
+  cutoff: 9000
+};
 
 const btn = document.getElementById("bellBtn");
 
@@ -49,12 +58,12 @@ function initAudio(){
 async function strikeBell(){
   initAudio();
 
-  // Tell parent to open bell controls panel
-  window.parent.postMessage("openBell", "*");
-
   if (ctx.state === "suspended") {
     await ctx.resume();
   }
+
+  // Open control panel
+  window.parent.postMessage("openBell", "*");
 
   const carrier = ctx.createOscillator();
   const modulator = ctx.createOscillator();
@@ -62,22 +71,16 @@ async function strikeBell(){
   const filter = ctx.createBiquadFilter();
   const gainNode = ctx.createGain();
 
-  // Default values (controls now live elsewhere)
-  const baseFreq = 440;
-  const ratio = 2.5;
-  const index = 120;
-  const decay = 2;
-
   carrier.type = "sine";
   modulator.type = "sine";
 
-  carrier.frequency.value = baseFreq;
-  modulator.frequency.value = baseFreq * ratio;
+  carrier.frequency.value = params.freq;
+  modulator.frequency.value = params.freq * params.ratio;
 
-  modGain.gain.value = index;
+  modGain.gain.value = params.index;
 
   filter.type = "lowpass";
-  filter.frequency.value = 9000;
+  filter.frequency.value = params.cutoff;
   filter.Q.value = 0.7;
 
   modulator.connect(modGain);
@@ -91,14 +94,21 @@ async function strikeBell(){
 
   gainNode.gain.setValueAtTime(0, now);
   gainNode.gain.linearRampToValueAtTime(1, now + 0.01);
-  gainNode.gain.exponentialRampToValueAtTime(0.001, now + decay);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, now + params.decay);
 
   carrier.start(now);
   modulator.start(now);
 
-  carrier.stop(now + decay + 0.3);
-  modulator.stop(now + decay + 0.3);
+  carrier.stop(now + params.decay + 0.3);
+  modulator.stop(now + params.decay + 0.3);
 }
+
+/* Listen for slider updates from parent */
+window.addEventListener("message", (e) => {
+  if(e.data.type === "bellParam"){
+    params[e.data.param] = parseFloat(e.data.value);
+  }
+});
 
 btn.addEventListener("pointerdown", strikeBell);
 </script>
