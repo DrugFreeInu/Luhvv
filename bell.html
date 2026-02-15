@@ -54,15 +54,17 @@ function initAudio(){
   }
 }
 
+/* 🔓 OPEN PANEL ON LOAD (only once) */
+window.addEventListener("load", () => {
+  window.parent.postMessage("openBell", "*");
+});
+
 async function strikeBell(){
   initAudio();
 
   if (ctx.state === "suspended") {
     await ctx.resume();
   }
-
-  // ✅ Keep this — needed to open panel
-  window.parent.postMessage("openBell", "*");
 
   const carrier = ctx.createOscillator();
   const modulator = ctx.createOscillator();
@@ -102,6 +104,7 @@ async function strikeBell(){
   modulator.stop(now + params.decay + 0.3);
 }
 
+/* Listen for slider updates */
 window.addEventListener("message", (e) => {
   if(e.data.type === "bellParam"){
     params[e.data.param] = parseFloat(e.data.value);
