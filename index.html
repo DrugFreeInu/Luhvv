@@ -25,14 +25,12 @@ html, body {
 #beams {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
   border: none;
   z-index: 0;
   pointer-events: none;
 }
 
-/* Vocal area (top) */
+/* Top vocal section */
 #vocal {
   width: 100%;
   height: 30vh;
@@ -41,27 +39,37 @@ html, body {
   background: transparent;
 }
 
-/* Lower layout */
+/* Lower main area */
 #lowerSection {
   flex: 1;
   display: flex;
-  justify-content: flex-end;   /* Push everything right */
+  justify-content: space-between;
   align-items: center;
-  padding-right: 40px;
+  padding: 0 40px;
   z-index: 10;
 }
 
-/* Button stack (right side column) */
-#engineStack {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;        /* tight spacing */
+/* LEFT SLIDER PANEL */
+#sliderPanel {
+  width: 340px;
+  height: 70%;
+  border: none;
+  background: transparent;
+  display: none; /* hidden by default */
 }
 
-/* Individual engine frames */
+/* RIGHT BUTTON RAIL */
+#engineRail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* tighter spacing */
+  align-items: flex-end;
+}
+
+/* Button iframes */
 #wub, #bell {
-  width: 220px;
-  height: 140px;
+  width: 200px;
+  height: 110px;
   border: none;
   background: transparent;
 }
@@ -77,13 +85,40 @@ html, body {
   <iframe id="vocal" src="vocal.html" allowtransparency="true"></iframe>
 
   <div id="lowerSection">
-    <div id="engineStack">
+
+    <!-- LEFT: dynamic slider panel -->
+    <iframe id="sliderPanel"></iframe>
+
+    <!-- RIGHT: engine buttons -->
+    <div id="engineRail">
       <iframe id="wub" src="wub.html" allowtransparency="true"></iframe>
       <iframe id="bell" src="bell.html" allowtransparency="true"></iframe>
     </div>
+
   </div>
 
-</div>
+</div>no
+
+<script>
+const sliderPanel = document.getElementById("sliderPanel");
+const wubFrame = document.getElementById("wub");
+const bellFrame = document.getElementById("bell");
+
+function showPanel(src){
+  sliderPanel.src = src;
+  sliderPanel.style.display = "block";
+}
+
+/* When WUB iframe is clicked */
+wubFrame.addEventListener("click", () => {
+  showPanel("wub.html");
+});
+
+/* When BELL iframe is clicked */
+bellFrame.addEventListener("click", () => {
+  showPanel("bell.html");
+});
+</script>
 
 </body>
 </html>
