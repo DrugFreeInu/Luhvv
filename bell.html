@@ -11,24 +11,21 @@ html, body {
   background: transparent;
   color: white;
   font-family: system-ui;
-  height: 100%;
 }
 
-/* ===== MAIN LAYOUT ===== */
-
+/* Main layout */
 #layout {
   display: flex;
-  height: 100vh;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 60px;
+  gap: 20px;
   padding: 20px;
 }
 
-/* ===== SLIDERS COLUMN ===== */
-
+/* Sliders */
 #controls {
-  display: none; /* hidden by default */
+  display: flex;
   flex-direction: column;
   gap: 18px;
   width: 260px;
@@ -38,8 +35,7 @@ input[type=range] {
   width: 100%;
 }
 
-/* ===== BELL BUTTON ===== */
-
+/* Bell button */
 #bellBtn {
   width: 160px;
   height: 60px;
@@ -60,6 +56,8 @@ input[type=range] {
 
 <div id="layout">
 
+  <button id="bellBtn">BELL</button>
+
   <div id="controls">
     <input type="range" id="freq" min="150" max="1200" value="440">
     <input type="range" id="ratio" min="0.5" max="6" step="0.1" value="2.5">
@@ -68,16 +66,12 @@ input[type=range] {
     <input type="range" id="cutoff" min="2000" max="12000" value="9000">
   </div>
 
-  <button id="bellBtn">BELL</button>
-
 </div>
 
 <script>
 let ctx;
-let controlsVisible = false;
 
 const btn = document.getElementById("bellBtn");
-const controls = document.getElementById("controls");
 
 const freqSlider = document.getElementById("freq");
 const ratioSlider = document.getElementById("ratio");
@@ -91,13 +85,11 @@ function initAudio(){
   }
 }
 
-function toggleControls(){
-  controlsVisible = !controlsVisible;
-  controls.style.display = controlsVisible ? "flex" : "none";
-}
-
 async function strikeBell(){
   initAudio();
+
+  // Tell parent to open panel
+  window.parent.postMessage("openBell", "*");
 
   if (ctx.state === "suspended") {
     await ctx.resume();
@@ -146,7 +138,6 @@ async function strikeBell(){
   modulator.stop(now + decay + 0.3);
 }
 
-btn.addEventListener("click", toggleControls);
 btn.addEventListener("pointerdown", strikeBell);
 </script>
 
