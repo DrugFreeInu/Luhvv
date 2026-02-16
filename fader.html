@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Cave Echo Module</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  height:100vh;
+  background:#111;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:30px;
+  font-family:system-ui;
+  color:white;
+}
+
+/* FADER PANEL */
+.fader-panel{
+  border:1px solid #444;
+  padding:25px;
+  width:260px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:20px;
+  background:#151515;
+}
+
+.fader-title{
+  font-weight:bold;
+  letter-spacing:2px;
+  font-size:14px;
+  color:#aaa;
+}
+
+/* Inputs */
+.input-group{
+  text-align:center;
+}
+
+input{
+  width:90px;
+  padding:8px;
+  background:#000;
+  border:1px solid #444;
+  color:white;
+  text-align:center;
+  font-size:16px;
+  margin-top:6px;
+}
+
+input::placeholder{
+  color:#666;
+}
+
+/* Direction buttons */
+.direction{
+  display:flex;
+  gap:10px;
+}
+
+.dir-btn{
+  width:70px;
+  height:45px;
+  background:#222;
+  border:1px solid #444;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+  user-select:none;
+  font-weight:bold;
+}
+
+.dir-btn.active{
+  background:#444;
+  border-color:#777;
+}
+
+/* Play */
+button{
+  padding:10px 20px;
+  background:#222;
+  border:1px solid #444;
+  color:white;
+  cursor:pointer;
+}
+
+button:disabled{
+  opacity:0.4;
+  cursor:not-allowed;
+}
+</style>
+</head>
+
+<body>
+
+<div class="fader-panel">
+  <div class="fader-title">FADER</div>
+
+  <div class="input-group">
+    Strength<br>
+    <input id="strength" type="number" min="1" max="100" placeholder="1–100">
+  </div>
+
+  <div class="input-group">
+    Length<br>
+    <input id="length" type="number" min="1" max="100" placeholder="1–100">
+  </div>
+
+  <div class="direction">
+    <div class="dir-btn" id="inBtn">IN</div>
+    <div class="dir-btn" id="outBtn">OUT</div>
+  </div>
+</div>
+
+<button id="playTone" disabled>Play Test Tone</button>
+
+<script>
+const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+const playBtn = document.getElementById("playTone");
+const strengthInput = document.getElementById("strength");
+const lengthInput = document.getElementById("length");
+const inBtn = document.getElementById("inBtn");
+const outBtn = document.getElementById("outBtn");
+
+// Processor input
+const processorInput = ctx.createGain();
+
+const dry = ctx.createGain();
+const wet = ctx.createGain();
+const convolver = ctx.createConvolver();
+const lowpass = ctx.createBiquadFilter();
+const preDelay = ctx.createDelay();
+
+lowpass.type = "lowpass";
+lowpass.frequency.value = 2400;
+preDelay.delayTime.value = 0.1;
+
+dry.gain.value = 1;
+wet.gain.value = 0;
+
+// Routing
+processorInput.connect(dry).connect(ctx.destination);
+
+processorInput.connect(preDelay);
+preDelay.connect(lowpass);
+lowpass.connect(convolver);
+convolver.connect(wet);
+wet.connect(ctx.destination);
+
+// Impulse generator
+function createImpulse(duration = 2, decay = 3){
+  const length = ctx.sampleRate * duration;
+  const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
+
+  for(let c = 0; c < 2; c++){
+    const data = impulse.getChannelData(c);
+    for(let i = 0; i < length; i++){
+      data[i] =
+        (Math.random() * 2 - 1) *
+        Math.pow(1 - i / length, decay);
+    }
+  }
+  return impulse;
+}
+
+// Update cave
+function updateCave(){
+  const strength = parseInt(strengthInput.value) || 0;
+  const length = parseInt(lengthInput.value) || 0;
+  const outActive = outBtn.classList.contains("active");
+
+  const normalizedStrength = strength / 100;
+  const normalizedLength = length / 100;
+
+  wet.gain.setTargetAtTime(normalizedStrength, ctx.currentTime, 0.1);
+  dry.gain.setTargetAtTime(1 - (normalizedStrength * 0.5), ctx.currentTime, 0.1);
+
+  let duration = 0.5 + normalizedLength * 6;
+
+  if(outActive){
+    duration += normalizedLength * 4;
+  }
+
+  convolver.buffer = createImpulse(duration, 3.5);
+}
+
+// Validation
+function validate(){
+  const strength = parseInt(strengthInput.value);
+  const length = parseInt(lengthInput.value);
+
+  const validStrength = !isNaN(strength) && strength >= 1 && strength <= 100;
+  const validLength = !isNaN(length) && length >= 1 && length <= 100;
+  const directionSelected = inBtn.classList.contains("active") || outBtn.classList.contains("active");
+
+  playBtn.disabled = !(validStrength && validLength && directionSelected);
+}
+
+strengthInput.addEventListener("input", () => {
+  updateCave();
+  validate();
+});
+
+lengthInput.addEventListener("input", () => {
+  updateCave();
+  validate();
+});
+
+inBtn.addEventListener("click", () => {
+  inBtn.classList.toggle("active");
+  validate();
+});
+
+outBtn.addEventListener("click", () => {
+  outBtn.classList.toggle("active");
+  updateCave();
+  validate();
+});
+
+// Test tone
+playBtn.addEventListener("click", async () => {
+  await ctx.resume();
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = "sawtooth";
+  osc.frequency.value = 220;
+
+  const now = ctx.currentTime;
+  const strength = parseInt(strengthInput.value) || 0;
+  const inActive = inBtn.classList.contains("active");
+
+  if(inActive){
+    const fadeTime = 0.3 + (strength / 100) * 1.2;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.6, now + fadeTime);
+  } else {
+    gain.gain.setValueAtTime(0.6, now);
+  }
+
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 3);
+
+  osc.connect(gain);
+  gain.connect(processorInput);
+
+  osc.start();
+  osc.stop(now + 3);
+});
+</script>
+
+</body>
+</html>
