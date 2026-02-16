@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Lazer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  margin:0;
+  height:100vh;
+  background:#0a001a;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:30px;
+  font-family:system-ui;
+  color:white;
+}
+
+/* Vertical Sliders */
+.slider-panel{
+  display:flex;
+  gap:25px;
+}
+
+input[type="range"]{
+  -webkit-appearance:none;
+  appearance:none;
+  width:6px;
+  height:180px;
+  background:#3a007a;
+  outline:none;
+  writing-mode:bt-lr;
+  -webkit-appearance:slider-vertical;
+}
+
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:18px;
+  height:18px;
+  background:#a066ff;
+  cursor:pointer;
+}
+
+/* Mode Section */
+.mode-container{
+  text-align:center;
+}
+
+.mode-buttons{
+  display:flex;
+  gap:15px;
+  margin-top:10px;
+  justify-content:center;
+}
+
+.mode-btn{
+  padding:8px 16px;
+  background:#12002a;
+  border:1px solid #5a00ff;
+  color:#b088ff;
+  cursor:pointer;
+}
+
+.mode-btn.active{
+  background:#2a0055;
+}
+
+.shots-input{
+  width:70px;
+  padding:6px;
+  background:#12002a;
+  border:1px solid #5a00ff;
+  color:#b088ff;
+  text-align:center;
+  margin-top:10px;
+}
+
+/* Lazer Button */
+.lazer-btn{
+  width:200px;
+  height:90px;
+  background:#12002a;
+  border:2px solid #5a00ff;
+  color:#b088ff;
+  font-weight:bold;
+  font-size:22px;
+  letter-spacing:5px;
+  cursor:pointer;
+  transition:all 0.15s ease;
+}
+
+.lazer-btn:active{
+  transform:scale(0.96);
+  background:#2a0055;
+}
+</style>
+</head>
+<body>
+
+<!-- Sliders -->
+<div class="slider-panel">
+  <input type="range" id="s1" min="0" max="100" value="50">
+  <input type="range" id="s2" min="0" max="100" value="50">
+  <input type="range" id="s3" min="0" max="100" value="50">
+  <input type="range" id="s4" min="0" max="100" value="50">
+</div>
+
+<!-- Firing Mode -->
+<div class="mode-container">
+  <div>Firing Rate: Steady & Spray</div>
+
+  <div class="mode-buttons">
+    <button id="steadyBtn" class="mode-btn active">Steady</button>
+    <button id="sprayBtn" class="mode-btn">Spray</button>
+  </div>
+
+  <div>
+    # of shots:<br>
+    <input id="shotsInput" class="shots-input" type="number" min="1" value="1">
+  </div>
+</div>
+
+<!-- Lazer Button -->
+<button id="lazerBtn" class="lazer-btn">LAZER</button>
+
+<script>
+const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+const lazerBtn = document.getElementById("lazerBtn");
+const steadyBtn = document.getElementById("steadyBtn");
+const sprayBtn = document.getElementById("sprayBtn");
+const shotsInput = document.getElementById("shotsInput");
+
+const s1 = document.getElementById("s1");
+const s2 = document.getElementById("s2");
+const s3 = document.getElementById("s3");
+const s4 = document.getElementById("s4");
+
+let sprayMode = false;
+
+/* Mode switching */
+steadyBtn.addEventListener("click", ()=>{
+  sprayMode = false;
+  steadyBtn.classList.add("active");
+  sprayBtn.classList.remove("active");
+});
+
+sprayBtn.addEventListener("click", ()=>{
+  sprayMode = true;
+  sprayBtn.classList.add("active");
+  steadyBtn.classList.remove("active");
+});
+
+lazerBtn.addEventListener("click", async ()=>{
+  await ctx.resume();
+
+  const shots = Math.max(1, parseInt(shotsInput.value) || 1);
+
+  for(let i=0;i<shots;i++){
+    fireLazer(i * 0.18); // controlled spacing
+  }
+});
+
+function fireLazer(offset){
+  const now = ctx.currentTime + offset;
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+  const pan = ctx.createStereoPanner();
+  const distortion = ctx.createWaveShaper();
+
+  const v1 = s1.value / 100; // depth
+  const v2 = s2.value / 100; // duration
+  const v3 = s3.value / 100; // distortion
+  const v4 = s4.value / 100; // width
+
+  // More sensitive depth curve
+  const depth = Math.pow(v1, 1.6);
+
+  let startFreq = 1000 + depth * 12000;
+  let endFreq = 100 + depth * 600;
+  let duration = 0.1 + v2 * 0.8;
+
+  if(sprayMode){
+    startFreq *= 0.7 + Math.random() * 1.2;
+    endFreq *= 0.6 + Math.random() * 1.4;
+    duration *= 0.7 + Math.random() * 1.2;
+    pan.pan.value = (Math.random() - 0.5) * 2;
+  } else {
+    pan.pan.value = (v4 - 0.5) * 2;
+  }
+
+  osc.type = "sawtooth";
+
+  osc.frequency.setValueAtTime(startFreq, now);
+  osc.frequency.exponentialRampToValueAtTime(endFreq, now + duration);
+
+  // Distortion
+  const curve = new Float32Array(256);
+  for(let i=0;i<256;i++){
+    const x = (i*2)/256 - 1;
+    curve[i] = Math.tanh((1 + v3*12) * x);
+  }
+  distortion.curve = curve;
+
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(1.0, now + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+  filter.type = "highpass";
+  filter.frequency.value = 500 + depth * 2000;
+
+  osc.connect(filter);
+  filter.connect(distortion);
+  distortion.connect(gain);
+  gain.connect(pan);
+  pan.connect(ctx.destination);
+
+  osc.start(now);
+  osc.stop(now + duration);
+}
+</script>
+
+</body>
+</html>
