@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SLo</title>
+
+<style>
+html, body {
+  margin: 0;
+  height: 100%;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: system-ui, sans-serif;
+}
+
+.control-btn {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background: radial-gradient(circle at 30% 30%, #222, #000);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.slo-text {
+  display: flex;
+  align-items: baseline;
+  font-size: 24px;
+}
+
+.slo-text span {
+  transition: all 0.2s ease;
+}
+</style>
+</head>
+
+<body>
+
+<div class="control-btn" id="sloBtn">
+  <div class="slo-text">
+    <span>SL</span>
+    <span id="sloO">o</span>
+  </div>
+</div>
+
+<script>
+const sloBtn = document.getElementById("sloBtn");
+const sloO = document.getElementById("sloO");
+
+let sloLevel = 0;
+const sloMax = 5;
+
+sloBtn.addEventListener("click", () => {
+  sloLevel++;
+  if (sloLevel > sloMax) sloLevel = 0;
+
+  const baseSize = 24;
+  const growth = baseSize + (sloLevel * 10);
+
+  sloO.style.fontSize = growth + "px";
+});
+</script>
+
+</body>
+</html>
