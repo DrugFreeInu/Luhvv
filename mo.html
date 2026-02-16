@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mo</title>
+
+<style>
+html, body {
+  margin: 0;
+  height: 100%;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: system-ui, sans-serif;
+}
+
+.control-btn {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background: radial-gradient(circle at 30% 30%, #222, #000);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.mo-text {
+  display: flex;
+  align-items: center;
+  font-size: 22px;
+}
+
+.mo-text span {
+  transition: all 0.2s ease;
+}
+</style>
+</head>
+
+<body>
+
+<div class="control-btn" id="moBtn">
+  <div class="mo-text">
+    <span id="letter1">M</span>
+    <span id="letter2">o</span>
+  </div>
+</div>
+
+<script>
+const moBtn = document.getElementById("moBtn");
+const letter1 = document.getElementById("letter1");
+const letter2 = document.getElementById("letter2");
+
+let moState = 0;
+
+moBtn.addEventListener("click", () => {
+  moState++;
+  if (moState > 3) moState = 0;
+
+  letter1.style.fontSize = "22px";
+  letter2.style.fontSize = "22px";
+
+  switch (moState) {
+    case 0:
+      letter1.textContent = "M";
+      letter2.textContent = "o";
+      letter2.style.fontSize = "32px";
+      break;
+
+    case 1:
+      letter1.textContent = "m";
+      letter2.textContent = "O";
+      letter2.style.fontSize = "32px";
+      break;
+
+    case 2:
+      letter1.textContent = "O";
+      letter2.textContent = "m";
+      letter1.style.fontSize = "32px";
+      break;
+
+    case 3:
+      letter1.textContent = "o";
+      letter2.textContent = "M";
+      letter1.style.fontSize = "32px";
+      break;
+  }
+});
+</script>
+
+</body>
+</html>
