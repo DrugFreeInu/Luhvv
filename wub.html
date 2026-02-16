@@ -8,25 +8,36 @@
 <style>
 html, body {
   margin: 0;
-  background: red;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: transparent; /* important */
+  height: 100%;
+  position: relative;
   font-family: system-ui;
 }
 
+/* WUB button positioned top-right */
 #wubBtn {
-  width: 160px;
-  height: 60px;
-  font-size: 18px;
-  background: transparent;
+  position: absolute;
+  top: 20%;
+  right: 8%;
+
+  width: 180px;
+  height: 70px;
+
+  font-size: 20px;
+  background: red;
   border: 2px solid white;
   color: white;
   cursor: pointer;
 }
 
+/* subtle press feedback */
 #wubBtn:active {
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 0, 0, 0.75);
+}
+
+/* optional glow on hover */
+#wubBtn:hover {
+  box-shadow: 0 0 20px rgba(255,0,0,0.6);
 }
 </style>
 </head>
@@ -41,7 +52,7 @@ let osc1, osc2, subOsc;
 let filter, gainNode;
 let isPlaying = false;
 
-/* Parameter state (same defaults as your perfect version) */
+/* Parameter state */
 let params = {
   freq: 55,
   subLevel: 1,
@@ -63,7 +74,6 @@ function startWub(){
   if(isPlaying) return;
   initAudio();
 
-  // Open control panel
   window.parent.postMessage("openWub", "*");
 
   osc1 = ctx.createOscillator();
