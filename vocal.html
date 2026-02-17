@@ -32,13 +32,13 @@ body {
   gap: 12px;
   padding: 20px;
   box-sizing: border-box;
-  align-items: center; /* center children */
+  align-items: center;
 }
 
-/* Unified width to match slider */
+/* Match slider width */
 .toolBlock {
-  width: 70%;          /* same as slider */
-  max-width: 240px;    /* same max as slider */
+  width: 70%;
+  max-width: 240px;
   height: 40px;
   background: transparent;
   border: 1px solid rgba(255,255,255,0.6);
@@ -53,13 +53,11 @@ body {
   justify-content: center;
 }
 
-/* Input specific */
 #inputField {
   text-align: left;
   border: 1px solid rgba(255,255,255,0.25);
 }
 
-/* Button behavior */
 button.toolBlock {
   cursor: pointer;
   transition: opacity 0.15s ease;
@@ -74,22 +72,30 @@ button.toolBlock:hover {
   margin-top: 8px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   font-size: 10px;
   letter-spacing: 2px;
   align-items: center;
 }
 
-.sliderWrap label {
-  margin-bottom: 4px;
+/* Each slider group identical */
+.sliderGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 70%;
+  max-width: 240px;
+  align-items: flex-start;
+}
+
+.sliderGroup label {
   opacity: 0.65;
 }
 
 /* Slider */
 input[type=range] {
   appearance: none;
-  width: 70%;
-  max-width: 240px;
+  width: 100%;
   height: 8px;
   border-radius: 4px;
   cursor: pointer;
@@ -109,11 +115,6 @@ input[type=range]::-webkit-slider-thumb {
   background: transparent;
   border: none;
   margin-top: -5px;
-}
-
-input[type=range]::-moz-range-track {
-  height: 8px;
-  border-radius: 4px;
 }
 
 input[type=range]::-moz-range-thumb {
@@ -157,22 +158,22 @@ input[type=range]::-moz-range-thumb {
 
   <div class="sliderWrap">
 
-    <div>
+    <div class="sliderGroup">
       <label>TONE</label>
       <input type="range" id="pitchSlider" min="0.5" max="2" step="0.01" value="1">
     </div>
 
-    <div>
+    <div class="sliderGroup">
       <label>SPEED</label>
       <input type="range" id="speedSlider" min="0.5" max="1.5" step="0.01" value="1">
     </div>
 
-    <div>
+    <div class="sliderGroup">
       <label>STRETCH</label>
       <input type="range" id="stretchSlider" min="0" max="1" step="0.01" value="0.5">
     </div>
 
-    <div>
+    <div class="sliderGroup">
       <label>DE-HARSH</label>
       <input type="range" id="deharshSlider" min="0" max="1" step="0.01" value="0.06">
     </div>
@@ -198,7 +199,6 @@ const presetList = document.getElementById("presetList");
 
 let presets = [];
 
-/* Smooth yellow fill */
 function updateFill(slider) {
   const min = parseFloat(slider.min);
   const max = parseFloat(slider.max);
