@@ -9,28 +9,24 @@
 html, body {
   margin: 0;
   height: 100%;
-  overflow: hidden;
+  background: black;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: white;
 }
 
 body {
-  background: transparent;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 40px;
-  padding-left: 20px;
-  padding-right: 20px;
-  color: white;
-  box-sizing: border-box;
+  padding: 40px 20px;
 }
 
 #inputField {
   width: 100%;
   max-width: 500px;
-  height: 50px;
+  height: 44px;
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.4);
+  border: 1px solid rgba(255,255,255,0.25);
   color: white;
   font-size: 18px;
   text-align: center;
@@ -38,131 +34,60 @@ body {
 }
 
 .buttonRow {
-  margin-top: 20px;
+  margin-top: 18px;
   display: flex;
   gap: 20px;
 }
 
 button {
-  width: 120px;
-  height: 40px;
+  width: 110px;
+  height: 38px;
   background: transparent;
   border: 1px solid white;
   color: white;
   cursor: pointer;
-  font-size: 14px;
-  letter-spacing: 1px;
-  transition: background 0.2s ease, transform 0.1s ease;
 }
 
-button:active {
-  transform: scale(0.97);
-}
-
-#saveBtn.unsaved {
-  background: rgba(255, 0, 0, 0.2);
-  border-color: red;
-}
-
-#saveBtn.saved {
-  background: rgba(0, 255, 0, 0.2);
-  border-color: lime;
-}
-
+/* Tighter control stack */
 .sliderWrap {
   width: 100%;
   max-width: 500px;
   margin-top: 25px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  font-size: 12px;
+  gap: 12px; /* reduced vertical spacing */
+  font-size: 11px;
   letter-spacing: 2px;
-  opacity: 0.9;
 }
 
-.sliderWrap.disabled {
-  opacity: 0.35;
-  pointer-events: none;
+.sliderWrap label {
+  margin-bottom: -6px; /* pulls label closer */
+  opacity: 0.75;
 }
 
-#pitchSlider {
+/* Thin black slider */
+input[type=range] {
   appearance: none;
   width: 100%;
-  height: 6px;
-  background: linear-gradient(
-    to right,
-    #001f5c 0%,
-    #2f6bff 25%,
-    #888888 50%,
-    #ff3b3b 75%,
-    #ff9ecf 100%
-  );
+  height: 4px; /* thinner */
+  border-radius: 3px;
+  cursor: pointer;
+  background: #000;
+  border: 1px solid #111;
+  transition: box-shadow 0.15s ease;
 }
 
-#speedSlider {
-  appearance: none;
-  width: 100%;
-  height: 6px;
-  background: linear-gradient(
-    to right,
-    #333 0%,
-    #888 50%,
-    #fff 100%
-  );
-}
-
+/* Hide thumb */
 input[type=range]::-webkit-slider-thumb {
   appearance: none;
-  width: 18px;
-  height: 18px;
-  background: white;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-/* ✅ KEY FIX: presetList no longer forces extra height when empty */
-#presetList {
-  margin-top: 20px; /* smaller default */
-  width: 100%;
-  max-width: 500px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-#presetList:empty {
-  margin-top: 0;
+  width: 0;
   height: 0;
-  min-height: 0;
-  padding: 0;
 }
 
-.presetItem {
-  width: 100%;
-  height: 50px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.3);
-  color: white;
-  cursor: pointer;
-  font-size: 14px;
-  opacity: 0.85;
-  transition: opacity 0.2s ease, background 0.2s ease, transform 0.1s ease;
-}
-
-.presetItem:hover {
-  opacity: 1;
-  background: rgba(255,255,255,0.05);
-}
-
-.presetItem:active {
-  transform: scale(0.97);
-}
-
-.presetItem.active {
-  opacity: 1;
-  border-color: rgba(255,255,255,0.9);
-  background: rgba(255,255,255,0.08);
+input[type=range]::-moz-range-thumb {
+  width: 0;
+  height: 0;
+  border: none;
 }
 </style>
 </head>
@@ -173,121 +98,104 @@ input[type=range]::-webkit-slider-thumb {
 
 <div class="buttonRow">
   <button id="listenBtn">LISTEN</button>
-  <button id="saveBtn" class="unsaved">SAVE</button>
 </div>
 
-<div class="sliderWrap disabled" id="sliderWrap">
-  <label>PITCH</label>
+<div class="sliderWrap">
+
+  <label>TONE</label>
   <input type="range" id="pitchSlider" min="0.5" max="2" step="0.01" value="1">
 
   <label>SPEED</label>
   <input type="range" id="speedSlider" min="0.5" max="1.5" step="0.01" value="1">
+
+  <label>STRETCH</label>
+  <input type="range" id="stretchSlider" min="0" max="1" step="0.01" value="0.5">
+
+  <label>DE-HARSH</label>
+  <input type="range" id="deharshSlider" min="0" max="1" step="0.01" value="0">
+
 </div>
 
-<div id="presetList"></div>
-
 <script>
-const input = document.getElementById("inputField");
-const listenBtn = document.getElementById("listenBtn");
-const saveBtn = document.getElementById("saveBtn");
-const pitchSlider = document.getElementById("pitchSlider");
-const speedSlider = document.getElementById("speedSlider");
-const presetList = document.getElementById("presetList");
-const sliderWrap = document.getElementById("sliderWrap");
 
-let sessionPresets = [];
-let activePresetIndex = -1;
+const sliders = document.querySelectorAll("input[type=range]");
 
-input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") playCurrent();
+/* Yellow fill logic */
+function updateFill(slider) {
+  const min = slider.min ? slider.min : 0;
+  const max = slider.max ? slider.max : 100;
+  const value = slider.value;
+
+  const percent = ((value - min) / (max - min)) * 100;
+
+  slider.style.background =
+    `linear-gradient(to right, 
+      rgba(255, 216, 77, 0.95) ${percent}%, 
+      #000 ${percent}%)`;
+
+  slider.style.boxShadow =
+    `0 0 8px rgba(255, 216, 77, 0.25)`;
+}
+
+sliders.forEach(slider => {
+  updateFill(slider);
+  slider.addEventListener("input", () => updateFill(slider));
 });
 
-listenBtn.addEventListener("click", playCurrent);
-saveBtn.addEventListener("click", savePreset);
+/* Speech engine */
 
-pitchSlider.addEventListener("input", () => updateActivePreset(true));
-speedSlider.addEventListener("input", () => updateActivePreset(true));
+const input = document.getElementById("inputField");
+const listenBtn = document.getElementById("listenBtn");
 
-function playSpeech(text, pitch, rate) {
+const pitchSlider = document.getElementById("pitchSlider");
+const speedSlider = document.getElementById("speedSlider");
+const stretchSlider = document.getElementById("stretchSlider");
+const deharshSlider = document.getElementById("deharshSlider");
+
+function softenText(text, amount){
+  if(amount === 0) return text;
+  return text.replace(/p/gi,"b")
+             .replace(/t/gi,"d")
+             .replace(/k/gi,"g")
+             .replace(/s/gi,"z");
+}
+
+function playFrozen(text) {
   speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.pitch = pitch;
-  utter.rate = rate;
-  speechSynthesis.speak(utter);
-}
 
-function playCurrent() {
-  const text = input.value.trim();
-  if (!text) return;
-  playSpeech(text, parseFloat(pitchSlider.value), parseFloat(speedSlider.value));
-}
+  let processed = softenText(text, parseFloat(deharshSlider.value));
 
-function savePreset() {
-  const text = input.value.trim();
-  if (!text) return;
+  const words = processed.split(" ");
+  let index = 0;
 
-  const preset = {
-    text,
-    pitch: parseFloat(pitchSlider.value),
-    speed: parseFloat(speedSlider.value)
-  };
+  function speakChunk(){
+    if(index >= words.length) return;
 
-  sessionPresets.push(preset);
-  renderPresets();
-  setSaved();
-}
+    const utter = new SpeechSynthesisUtterance(words[index]);
 
-function setActivePreset(index) {
-  activePresetIndex = index;
-  sliderWrap.classList.remove("disabled");
-  pitchSlider.value = sessionPresets[index].pitch;
-  speedSlider.value = sessionPresets[index].speed;
+    utter.pitch = parseFloat(pitchSlider.value);
 
-  [...presetList.querySelectorAll(".presetItem")].forEach((b, i) => {
-    b.classList.toggle("active", i === index);
-  });
-}
+    let rate = parseFloat(speedSlider.value) - (parseFloat(stretchSlider.value) * 0.8);
+    if(rate < 0.1) rate = 0.1;
 
-function updateActivePreset(replay) {
-  if (activePresetIndex < 0) return;
+    utter.rate = rate;
 
-  const p = sessionPresets[activePresetIndex];
-  p.pitch = parseFloat(pitchSlider.value);
-  p.speed = parseFloat(speedSlider.value);
+    utter.onend = function(){
+      index++;
+      speakChunk();
+    };
 
-  const btns = presetList.querySelectorAll(".presetItem");
-  const btn = btns[activePresetIndex];
-  if (btn) btn.textContent = `${p.text} (P:${p.pitch.toFixed(2)} S:${p.speed.toFixed(2)})`;
-
-  if (replay) playSpeech(p.text, p.pitch, p.speed);
-}
-
-function renderPresets() {
-  presetList.innerHTML = "";
-
-  sessionPresets.forEach((preset, idx) => {
-    const btn = document.createElement("button");
-    btn.className = "presetItem";
-    btn.textContent = `${preset.text} (P:${preset.pitch.toFixed(2)} S:${preset.speed.toFixed(2)})`;
-
-    btn.addEventListener("click", () => {
-      setActivePreset(idx);
-      playSpeech(preset.text, preset.pitch, preset.speed);
-      setSaved();
-    });
-
-    presetList.appendChild(btn);
-  });
-
-  if (activePresetIndex >= 0 && activePresetIndex < sessionPresets.length) {
-    setActivePreset(activePresetIndex);
+    speechSynthesis.speak(utter);
   }
+
+  speakChunk();
 }
 
-function setSaved() {
-  saveBtn.classList.remove("unsaved");
-  saveBtn.classList.add("saved");
-}
+listenBtn.addEventListener("click", () => {
+  const text = input.value.trim();
+  if (!text) return;
+  playFrozen(text);
+});
 </script>
 
 </body>
