@@ -31,14 +31,13 @@ html, body {
   pointer-events: none;
 }
 
-/* === FIXED VOCAL SECTION === */
+/* Top vocal section */
 #vocal {
   width: 100%;
-  flex: 0 0 40%;        /* instead of 40vh */
-  max-height: 40%;      /* prevents stretch */
+  height: 40vh;          /* keep your intent */
   border: none;
   z-index: 10;
-  background: green;    /* your debug color */
+  background: green;     /* debug */
   display: block;
 }
 
@@ -104,14 +103,17 @@ html, body {
 </div>
 
 <script>
-
 /* === FORCE FRESH LOAD === */
-const version = Date.now();
+const version = Date.now(); // unique per page load
 
 document.getElementById("beams").src = "beams.html?v=" + version;
 document.getElementById("vocal").src = "vocal.html?v=" + version;
 document.getElementById("wub").src = "wub.html?v=" + version;
 document.getElementById("bell").src = "bell.html?v=" + version;
+
+const app = document.getElementById("app");
+const vocalIframe = document.getElementById("vocal");
+const lowerSection = document.getElementById("lowerSection");
 
 const sliderPanel = document.getElementById("sliderPanel");
 const wubFrame = document.getElementById("wub");
@@ -119,9 +121,26 @@ const bellFrame = document.getElementById("bell");
 
 let currentPanel = null;
 
+/* === iOS SAFE HEIGHT CLAMP (THE FIX) ===
+   Locks app + vocal to real pixel viewport so iframe layout stops auto-scaling.
+*/
+function clampHeights(){
+  const H = window.innerHeight || document.documentElement.clientHeight;
+  app.style.height = H + "px";
+
+  const vocalH = Math.round(H * 0.40);  // your 40vh intent
+  vocalIframe.style.height = vocalH + "px";
+  lowerSection.style.height = (H - vocalH) + "px";
+}
+
+clampHeights();
+window.addEventListener("resize", clampHeights);
+window.addEventListener("orientationchange", () => setTimeout(clampHeights, 50));
+
+/* Only load panel if different */
 function togglePanel(src){
   if (currentPanel !== src) {
-    sliderPanel.src = src + "?v=" + version;
+    sliderPanel.src = src + "?v=" + version; // also fresh
     currentPanel = src;
   }
   sliderPanel.style.display = "block";
