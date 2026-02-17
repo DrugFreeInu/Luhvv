@@ -35,10 +35,11 @@ body {
   align-items: center;
 }
 
-/* Match slider width */
+/* EXACT SAME WIDTH AS SLIDERS */
 .toolBlock {
   width: 70%;
   max-width: 240px;
+  box-sizing: border-box;
   height: 40px;
   background: transparent;
   border: 1px solid rgba(255,255,255,0.6);
@@ -46,7 +47,6 @@ body {
   font-size: 14px;
   letter-spacing: 1px;
   padding: 0 12px;
-  box-sizing: border-box;
   outline: none;
   display: flex;
   align-items: center;
@@ -72,27 +72,25 @@ button.toolBlock:hover {
   margin-top: 6px;
   display: flex;
   flex-direction: column;
-  gap: 14px; /* slightly more breathing room */
+  gap: 14px;
   font-size: 10px;
   letter-spacing: 2px;
   align-items: center;
 }
 
-/* Compact but softened slider group */
 .sliderGroup {
   display: flex;
   flex-direction: column;
-  gap: 4px; /* was 2px — small increase */
+  gap: 4px;
   width: 70%;
   max-width: 240px;
-  box-sizing: border-box; /* ✅ ONLY ADDITION */
+  box-sizing: border-box;
 }
 
-/* Label styling */
 .sliderGroup label {
   opacity: 0.7;
   font-style: italic;
-  transform: skewX(-6deg); /* subtle slant */
+  transform: skewX(-6deg);
   letter-spacing: 1.5px;
   line-height: 1;
   margin: 0;
