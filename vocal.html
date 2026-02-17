@@ -29,7 +29,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 12px;
+  gap: 10px; /* slightly tighter */
   padding: 20px;
   box-sizing: border-box;
   align-items: center;
@@ -40,31 +40,36 @@ body {
   width: 70%;
   max-width: 100px;
   box-sizing: border-box;
-  height: 40px;
+  height: 36px; /* slightly tighter */
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.6);
+  border: 1px solid rgba(255,255,255,0.55);
   color: white;
-  font-size: 14px;
-  letter-spacing: 1px;
-  padding: 0 12px;
+  font-size: 12px; /* smaller for compact words */
+  letter-spacing: 2px;
+  padding: 0 10px;
   outline: none;
   display: flex;
   align-items: center;
   justify-content: center;
+  text-transform: uppercase;
 }
 
+/* Input */
 #inputField {
   text-align: left;
   border: 1px solid rgba(255,255,255,0.25);
+  letter-spacing: 1px;
 }
 
+/* Button behavior */
 button.toolBlock {
   cursor: pointer;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.15s ease, border-color 0.15s ease;
 }
 
 button.toolBlock:hover {
   opacity: 0.85;
+  border-color: rgba(255,255,255,0.8);
 }
 
 /* Sliders */
@@ -157,7 +162,7 @@ input[type=range]::-moz-range-thumb {
 
   <input id="inputField" class="toolBlock" type="text" placeholder="Type..." />
 
-  <button id="listenBtn" class="toolBlock">LISTEN</button>
+  <button id="listenBtn" class="toolBlock">TEST</button>
 
   <button id="saveBtn" class="toolBlock">SAVE</button>
 
