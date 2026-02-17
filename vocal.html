@@ -35,14 +35,10 @@ body {
   align-items: center;
 }
 
-/* === SHARED WIDTH SYSTEM === */
-.controlWidth {
+/* Match slider width */
+.toolBlock {
   width: 70%;
   max-width: 240px;
-}
-
-/* Input + Buttons */
-.toolBlock {
   height: 40px;
   background: transparent;
   border: 1px solid rgba(255,255,255,0.6);
@@ -76,22 +72,27 @@ button.toolBlock:hover {
   margin-top: 6px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 14px; /* slightly more breathing room */
   font-size: 10px;
   letter-spacing: 2px;
   align-items: center;
 }
 
+/* Compact but softened slider group */
 .sliderGroup {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 4px; /* was 2px — small increase */
+  width: 70%;
+  max-width: 240px;
+  box-sizing: border-box; /* ✅ ONLY ADDITION */
 }
 
+/* Label styling */
 .sliderGroup label {
   opacity: 0.7;
   font-style: italic;
-  transform: skewX(-6deg);
+  transform: skewX(-6deg); /* subtle slant */
   letter-spacing: 1.5px;
   line-height: 1;
   margin: 0;
@@ -156,30 +157,30 @@ input[type=range]::-moz-range-thumb {
 
 <div class="container">
 
-  <input id="inputField" class="toolBlock controlWidth" type="text" placeholder="Type phrase..." />
+  <input id="inputField" class="toolBlock" type="text" placeholder="Type phrase..." />
 
-  <button id="listenBtn" class="toolBlock controlWidth">LISTEN</button>
+  <button id="listenBtn" class="toolBlock">LISTEN</button>
 
-  <button id="saveBtn" class="toolBlock controlWidth">SAVE</button>
+  <button id="saveBtn" class="toolBlock">SAVE</button>
 
   <div class="sliderWrap">
 
-    <div class="sliderGroup controlWidth">
+    <div class="sliderGroup">
       <label>TONE</label>
       <input type="range" id="pitchSlider" min="0.5" max="2" step="0.01" value="1">
     </div>
 
-    <div class="sliderGroup controlWidth">
+    <div class="sliderGroup">
       <label>SPEED</label>
       <input type="range" id="speedSlider" min="0.5" max="1.5" step="0.01" value="1">
     </div>
 
-    <div class="sliderGroup controlWidth">
+    <div class="sliderGroup">
       <label>STRETCH</label>
       <input type="range" id="stretchSlider" min="0" max="1" step="0.01" value="0.5">
     </div>
 
-    <div class="sliderGroup controlWidth">
+    <div class="sliderGroup">
       <label>DE-HARSH</label>
       <input type="range" id="deharshSlider" min="0" max="1" step="0.01" value="0.06">
     </div>
@@ -189,3 +190,119 @@ input[type=range]::-moz-range-thumb {
   <div id="presetList"></div>
 
 </div>
+
+<script>
+const input = document.getElementById("inputField");
+const listenBtn = document.getElementById("listenBtn");
+const saveBtn = document.getElementById("saveBtn");
+
+const pitchSlider = document.getElementById("pitchSlider");
+const speedSlider = document.getElementById("speedSlider");
+const stretchSlider = document.getElementById("stretchSlider");
+const deharshSlider = document.getElementById("deharshSlider");
+
+const sliders = document.querySelectorAll("input[type=range]");
+const presetList = document.getElementById("presetList");
+
+let presets = [];
+
+function updateFill(slider) {
+  const min = parseFloat(slider.min);
+  const max = parseFloat(slider.max);
+  const value = parseFloat(slider.value);
+  const percent = ((value - min) / (max - min)) * 100;
+
+  slider.style.background =
+    `linear-gradient(to right,
+      #FFD84D ${percent}%,
+      #000 ${percent}%)`;
+}
+
+sliders.forEach(slider => {
+  updateFill(slider);
+  slider.addEventListener("input", () => updateFill(slider));
+});
+
+function softenText(text, amount){
+  if(amount === 0) return text;
+  return text.replace(/p/gi,"b")
+             .replace(/t/gi,"d")
+             .replace(/k/gi,"g")
+             .replace(/s/gi,"z");
+}
+
+function playFrozen(text) {
+  speechSynthesis.cancel();
+
+  let processed = softenText(text, parseFloat(deharshSlider.value));
+  const words = processed.split(" ");
+  let index = 0;
+
+  function speakChunk(){
+    if(index >= words.length) return;
+
+    const utter = new SpeechSynthesisUtterance(words[index]);
+    utter.pitch = parseFloat(pitchSlider.value);
+
+    let rate = parseFloat(speedSlider.value) - (parseFloat(stretchSlider.value) * 0.8);
+    if(rate < 0.1) rate = 0.1;
+
+    utter.rate = rate;
+
+    utter.onend = function(){
+      index++;
+      speakChunk();
+    };
+
+    speechSynthesis.speak(utter);
+  }
+
+  speakChunk();
+}
+
+listenBtn.addEventListener("click", () => {
+  const text = input.value.trim();
+  if (!text) return;
+  playFrozen(text);
+});
+
+saveBtn.addEventListener("click", () => {
+  const text = input.value.trim();
+  if (!text) return;
+
+  const preset = {
+    text,
+    pitch: pitchSlider.value,
+    speed: speedSlider.value,
+    stretch: stretchSlider.value,
+    deharsh: deharshSlider.value
+  };
+
+  presets.push(preset);
+  renderPresets();
+});
+
+function renderPresets() {
+  presetList.innerHTML = "";
+
+  presets.forEach((preset) => {
+    const div = document.createElement("div");
+    div.className = "presetItem";
+    div.textContent = preset.text;
+
+    div.addEventListener("click", () => {
+      input.value = preset.text;
+      pitchSlider.value = preset.pitch;
+      speedSlider.value = preset.speed;
+      stretchSlider.value = preset.stretch;
+      deharshSlider.value = preset.deharsh;
+      sliders.forEach(s => updateFill(s));
+    });
+
+    presetList.appendChild(div);
+  });
+}
+</script>
+
+</body>
+</html>
