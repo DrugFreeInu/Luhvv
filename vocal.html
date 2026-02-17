@@ -12,20 +12,25 @@ html, body {
   background: #000;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   color: white;
+  overflow: hidden; /* prevent scroll */
 }
 
+/* Viewport-locked layout */
 body {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  padding: 40px 20px;
 }
 
 .container {
   width: 100%;
   max-width: 500px;
+  height: 100dvh; /* Safari-safe viewport height */
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 /* Phrase input */
@@ -42,14 +47,14 @@ body {
 
 /* Buttons under input */
 .buttonRow {
-  margin-top: 10px;
+  margin-top: 8px;
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 button {
   flex: 1;
-  height: 38px;
+  height: 36px;
   background: transparent;
   border: 1px solid rgba(255,255,255,0.6);
   color: white;
@@ -65,10 +70,10 @@ button:hover {
 
 /* Sliders */
 .sliderWrap {
-  margin-top: 26px;
+  margin-top: 18px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
   font-size: 10px;
   letter-spacing: 2px;
 }
@@ -119,14 +124,14 @@ input[type=range]::-moz-range-thumb {
 
 /* Presets */
 #presetList {
-  margin-top: 24px;
+  margin-top: 14px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .presetItem {
-  padding: 8px 10px;
+  padding: 6px 8px;
   border: 1px solid rgba(255,255,255,0.2);
   font-size: 11px;
   cursor: pointer;
@@ -169,7 +174,6 @@ input[type=range]::-moz-range-thumb {
 
     <div>
       <label>DE-HARSH</label>
-      <!-- subtle pre-fill -->
       <input type="range" id="deharshSlider" min="0" max="1" step="0.01" value="0.06">
     </div>
 
@@ -180,7 +184,6 @@ input[type=range]::-moz-range-thumb {
 </div>
 
 <script>
-
 const input = document.getElementById("inputField");
 const listenBtn = document.getElementById("listenBtn");
 const saveBtn = document.getElementById("saveBtn");
@@ -258,7 +261,6 @@ listenBtn.addEventListener("click", () => {
   playFrozen(text);
 });
 
-/* Save Presets */
 saveBtn.addEventListener("click", () => {
   const text = input.value.trim();
   if (!text) return;
@@ -295,7 +297,6 @@ function renderPresets() {
     presetList.appendChild(div);
   });
 }
-
 </script>
 
 </body>
