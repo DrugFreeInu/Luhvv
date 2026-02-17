@@ -9,13 +9,13 @@
 html, body {
   margin: 0;
   height: 100%;
-  background: transparent ;
+  background: transparent;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   color: white;
-  overflow: hidden; /* prevent scroll */
+  overflow: hidden;
 }
 
-/* Viewport-locked layout */
+/* Layout */
 body {
   display: flex;
   justify-content: center;
@@ -24,58 +24,58 @@ body {
 
 .container {
   width: 100%;
-  max-width: 500px;
-  height: 100dvh; /* Safari-safe viewport height */
+  max-width: 360px;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  gap: 12px;
   padding: 20px;
   box-sizing: border-box;
 }
 
-/* Phrase input */
-#inputField {
+/* Unified input + buttons style */
+.toolBlock {
   width: 100%;
-  height: 42px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.25);
-  color: white;
-  font-size: 16px;
-  padding: 0 12px;
-  outline: none;
-}
-
-/* Buttons under input */
-.buttonRow {
-  margin-top: 8px;
-  display: flex;
-  gap: 8px;
-}
-
-button {
-  flex: 1;
-  height: 36px;
+  height: 40px;
   background: transparent;
   border: 1px solid rgba(255,255,255,0.6);
   color: white;
-  cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 1px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Input specific */
+#inputField {
+  text-align: left;
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+/* Button behavior */
+button.toolBlock {
+  cursor: pointer;
   transition: opacity 0.15s ease;
 }
 
-button:hover {
+button.toolBlock:hover {
   opacity: 0.85;
 }
 
 /* Sliders */
 .sliderWrap {
-  margin-top: 18px;
+  margin-top: 8px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   font-size: 10px;
   letter-spacing: 2px;
+  align-items: center;
 }
 
 .sliderWrap label {
@@ -83,10 +83,11 @@ button:hover {
   opacity: 0.65;
 }
 
-/* Base slider */
+/* Slider */
 input[type=range] {
   appearance: none;
-  width: 100%;
+  width: 70%;
+  max-width: 240px;
   height: 8px;
   border-radius: 4px;
   cursor: pointer;
@@ -94,13 +95,11 @@ input[type=range] {
   border: 1px solid #141414;
 }
 
-/* WebKit track */
 input[type=range]::-webkit-slider-runnable-track {
   height: 8px;
   border-radius: 4px;
 }
 
-/* Invisible but present thumb */
 input[type=range]::-webkit-slider-thumb {
   appearance: none;
   width: 18px;
@@ -124,7 +123,7 @@ input[type=range]::-moz-range-thumb {
 
 /* Presets */
 #presetList {
-  margin-top: 14px;
+  margin-top: 10px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -148,12 +147,11 @@ input[type=range]::-moz-range-thumb {
 
 <div class="container">
 
-  <input id="inputField" type="text" placeholder="Type phrase..." />
+  <input id="inputField" class="toolBlock" type="text" placeholder="Type phrase..." />
 
-  <div class="buttonRow">
-    <button id="listenBtn">LISTEN</button>
-    <button id="saveBtn">SAVE</button>
-  </div>
+  <button id="listenBtn" class="toolBlock">LISTEN</button>
+
+  <button id="saveBtn" class="toolBlock">SAVE</button>
 
   <div class="sliderWrap">
 
@@ -215,8 +213,6 @@ sliders.forEach(slider => {
   updateFill(slider);
   slider.addEventListener("input", () => updateFill(slider));
 });
-
-/* Speech Engine */
 
 function softenText(text, amount){
   if(amount === 0) return text;
