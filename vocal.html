@@ -29,24 +29,24 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 10px; /* slightly tighter */
+  gap: 8px; /* slightly tighter */
   padding: 20px;
   box-sizing: border-box;
   align-items: center;
 }
 
-/* EXACT SAME WIDTH AS SLIDERS */
+/* SAME WIDTH — smaller scale */
 .toolBlock {
   width: 70%;
-  max-width: 100px;
+  max-width: 80px;
   box-sizing: border-box;
-  height: 36px; /* slightly tighter */
+  height: 30px; /* smaller */
   background: transparent;
   border: 1px solid rgba(255,255,255,0.55);
   color: white;
-  font-size: 12px; /* smaller for compact words */
-  letter-spacing: 2px;
-  padding: 0 10px;
+  font-size: 11px; /* slightly smaller */
+  letter-spacing: 1.5px; /* slightly tighter */
+  padding: 0 8px;
   outline: none;
   display: flex;
   align-items: center;
@@ -59,6 +59,7 @@ body {
   text-align: left;
   border: 1px solid rgba(255,255,255,0.25);
   letter-spacing: 1px;
+  text-transform: none;
 }
 
 /* Button behavior */
@@ -160,7 +161,7 @@ input[type=range]::-moz-range-thumb {
 
 <div class="container">
 
-  <input id="inputField" class="toolBlock" type="text" placeholder="Type..." />
+  <input id="inputField" class="toolBlock" type="text" placeholder="Type" />
 
   <button id="listenBtn" class="toolBlock">TEST</button>
 
@@ -193,119 +194,3 @@ input[type=range]::-moz-range-thumb {
   <div id="presetList"></div>
 
 </div>
-
-<script>
-const input = document.getElementById("inputField");
-const listenBtn = document.getElementById("listenBtn");
-const saveBtn = document.getElementById("saveBtn");
-
-const pitchSlider = document.getElementById("pitchSlider");
-const speedSlider = document.getElementById("speedSlider");
-const stretchSlider = document.getElementById("stretchSlider");
-const deharshSlider = document.getElementById("deharshSlider");
-
-const sliders = document.querySelectorAll("input[type=range]");
-const presetList = document.getElementById("presetList");
-
-let presets = [];
-
-function updateFill(slider) {
-  const min = parseFloat(slider.min);
-  const max = parseFloat(slider.max);
-  const value = parseFloat(slider.value);
-  const percent = ((value - min) / (max - min)) * 100;
-
-  slider.style.background =
-    `linear-gradient(to right,
-      #FFD84D ${percent}%,
-      #000 ${percent}%)`;
-}
-
-sliders.forEach(slider => {
-  updateFill(slider);
-  slider.addEventListener("input", () => updateFill(slider));
-});
-
-function softenText(text, amount){
-  if(amount === 0) return text;
-  return text.replace(/p/gi,"b")
-             .replace(/t/gi,"d")
-             .replace(/k/gi,"g")
-             .replace(/s/gi,"z");
-}
-
-function playFrozen(text) {
-  speechSynthesis.cancel();
-
-  let processed = softenText(text, parseFloat(deharshSlider.value));
-  const words = processed.split(" ");
-  let index = 0;
-
-  function speakChunk(){
-    if(index >= words.length) return;
-
-    const utter = new SpeechSynthesisUtterance(words[index]);
-    utter.pitch = parseFloat(pitchSlider.value);
-
-    let rate = parseFloat(speedSlider.value) - (parseFloat(stretchSlider.value) * 0.8);
-    if(rate < 0.1) rate = 0.1;
-
-    utter.rate = rate;
-
-    utter.onend = function(){
-      index++;
-      speakChunk();
-    };
-
-    speechSynthesis.speak(utter);
-  }
-
-  speakChunk();
-}
-
-listenBtn.addEventListener("click", () => {
-  const text = input.value.trim();
-  if (!text) return;
-  playFrozen(text);
-});
-
-saveBtn.addEventListener("click", () => {
-  const text = input.value.trim();
-  if (!text) return;
-
-  const preset = {
-    text,
-    pitch: pitchSlider.value,
-    speed: speedSlider.value,
-    stretch: stretchSlider.value,
-    deharsh: deharshSlider.value
-  };
-
-  presets.push(preset);
-  renderPresets();
-});
-
-function renderPresets() {
-  presetList.innerHTML = "";
-
-  presets.forEach((preset) => {
-    const div = document.createElement("div");
-    div.className = "presetItem";
-    div.textContent = preset.text;
-
-    div.addEventListener("click", () => {
-      input.value = preset.text;
-      pitchSlider.value = preset.pitch;
-      speedSlider.value = preset.speed;
-      stretchSlider.value = preset.stretch;
-      deharshSlider.value = preset.deharsh;
-      sliders.forEach(s => updateFill(s));
-    });
-
-    presetList.appendChild(div);
-  });
-}
-</script>
-
-</body>
-</html>
