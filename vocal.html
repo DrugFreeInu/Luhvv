@@ -69,27 +69,28 @@ button.toolBlock:hover {
 
 /* Sliders */
 .sliderWrap {
-  margin-top: 8px;
+  margin-top: 4px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px; /* tighter */
   font-size: 10px;
   letter-spacing: 2px;
   align-items: center;
 }
 
-/* Each slider group identical */
+/* Compact slider group */
 .sliderGroup {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px; /* label close to slider */
   width: 70%;
   max-width: 240px;
-  align-items: flex-start;
 }
 
 .sliderGroup label {
   opacity: 0.65;
+  line-height: 1;
+  margin: 0;
 }
 
 /* Slider */
@@ -101,6 +102,7 @@ input[type=range] {
   cursor: pointer;
   background: #000;
   border: 1px solid #141414;
+  margin: 0;
 }
 
 input[type=range]::-webkit-slider-runnable-track {
