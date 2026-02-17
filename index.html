@@ -31,13 +31,15 @@ html, body {
   pointer-events: none;
 }
 
-/* Top vocal section */
+/* === FIXED VOCAL SECTION === */
 #vocal {
   width: 100%;
-  height: 40vh;
+  flex: 0 0 40%;        /* instead of 40vh */
+  max-height: 40%;      /* prevents stretch */
   border: none;
   z-index: 10;
-  background: green;
+  background: green;    /* your debug color */
+  display: block;
 }
 
 /* Lower main area */
@@ -104,7 +106,7 @@ html, body {
 <script>
 
 /* === FORCE FRESH LOAD === */
-const version = Date.now(); // unique per page load
+const version = Date.now();
 
 document.getElementById("beams").src = "beams.html?v=" + version;
 document.getElementById("vocal").src = "vocal.html?v=" + version;
@@ -117,10 +119,9 @@ const bellFrame = document.getElementById("bell");
 
 let currentPanel = null;
 
-/* Only load panel if different */
 function togglePanel(src){
   if (currentPanel !== src) {
-    sliderPanel.src = src + "?v=" + version; // also fresh
+    sliderPanel.src = src + "?v=" + version;
     currentPanel = src;
   }
   sliderPanel.style.display = "block";
