@@ -60,11 +60,11 @@ html, body {
   z-index: 20;
 }
 
-/* === UPDATED BUTTON POSITION === */
+/* Engine rail */
 #engineRail {
   position: absolute;
-  right: 80px;   /* horizontal distance from right edge */
-  top: 140px;    /* vertical placement (adjust this to fine tune) */
+  right: 80px;
+  top: 140px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -72,7 +72,6 @@ html, body {
   z-index: 30;
 }
 
-/* Button iframes */
 #wub, #bell {
   width: 200px;
   height: 110px;
@@ -86,17 +85,16 @@ html, body {
 
 <div id="app">
 
-  <iframe id="beams" src="beams.html"></iframe>
-
-  <iframe id="vocal" src="vocal.html" allowtransparency="true"></iframe>
+  <iframe id="beams"></iframe>
+  <iframe id="vocal" allowtransparency="true"></iframe>
 
   <div id="lowerSection">
 
     <iframe id="sliderPanel"></iframe>
 
     <div id="engineRail">
-      <iframe id="wub" src="wub.html" allowtransparency="true"></iframe>
-      <iframe id="bell" src="bell.html" allowtransparency="true"></iframe>
+      <iframe id="wub" allowtransparency="true"></iframe>
+      <iframe id="bell" allowtransparency="true"></iframe>
     </div>
 
   </div>
@@ -104,6 +102,15 @@ html, body {
 </div>
 
 <script>
+
+/* === FORCE FRESH LOAD === */
+const version = Date.now(); // unique per page load
+
+document.getElementById("beams").src = "beams.html?v=" + version;
+document.getElementById("vocal").src = "vocal.html?v=" + version;
+document.getElementById("wub").src = "wub.html?v=" + version;
+document.getElementById("bell").src = "bell.html?v=" + version;
+
 const sliderPanel = document.getElementById("sliderPanel");
 const wubFrame = document.getElementById("wub");
 const bellFrame = document.getElementById("bell");
@@ -113,7 +120,7 @@ let currentPanel = null;
 /* Only load panel if different */
 function togglePanel(src){
   if (currentPanel !== src) {
-    sliderPanel.src = src;
+    sliderPanel.src = src + "?v=" + version; // also fresh
     currentPanel = src;
   }
   sliderPanel.style.display = "block";
