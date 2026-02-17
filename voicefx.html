@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Frozen Stretch Live</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  margin:0;
+  background:#0e0e0e;
+  color:white;
+  font-family:system-ui;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:20px;
+  height:100vh;
+}
+textarea{
+  width:320px;
+  height:80px;
+  background:#1a1a1a;
+  color:white;
+  border:1px solid #333;
+  padding:10px;
+  resize:none;
+}
+.controls{
+  width:320px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+input[type="range"]{
+  width:100%;
+}
+button{
+  padding:14px;
+  background:black;
+  color:white;
+  border:2px solid white;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<textarea id="text">
+System online. Audio processing activated.
+</textarea>
+
+<div class="controls">
+<label>Stretch</label>
+<input type="range" id="stretch" min="0" max="1" step="0.01" value="0.5">
+
+<label>De-Harsh (Hard)</label>
+<input type="range" id="deharsh" min="0" max="1" step="0.01" value="0">
+
+<label>De-Harsh (Soft Sensitive)</label>
+<input type="range" id="deharsh2" min="0" max="1" step="0.01" value="0">
+</div>
+
+<button onclick="activate()">Activate Frozen Voice</button>
+
+<script>
+
+let speaking = false;
+
+// -------- ORIGINAL HARD VERSION (UNCHANGED) --------
+function softenText(text, amount){
+
+  if(amount === 0) return text;
+
+  let softened = text;
+
+  const intensity = amount;
+
+  softened = softened.replace(/p/gi, intensity > 0.5 ? "b" : "ph");
+  softened = softened.replace(/t/gi, intensity > 0.5 ? "d" : "th");
+  softened = softened.replace(/k/gi, intensity > 0.5 ? "g" : "kh");
+  softened = softened.replace(/s/gi, intensity > 0.5 ? "z" : "sh");
+
+  return softened;
+}
+
+// -------- NEW PROBABILISTIC VERSION --------
+function softenTextProb(text, amount){
+
+  if(amount === 0) return text;
+
+  return text.split("").map(char => {
+
+    const lower = char.toLowerCase();
+
+    function maybeReplace(original, soft1, soft2){
+      if(Math.random() < amount){
+        return amount > 0.6 ? soft2 : soft1;
+      }
+      return original;
+    }
+
+    switch(lower){
+      case "p": return maybeReplace(char, "ph", "b");
+      case "t": return maybeReplace(char, "th", "d");
+      case "k": return maybeReplace(char, "kh", "g");
+      case "s": return maybeReplace(char, "sh", "z");
+      default: return char;
+    }
+
+  }).join("");
+}
+
+function activate(){
+
+  if(speaking){
+    speechSynthesis.cancel();
+    speaking = false;
+    return;
+  }
+
+  speechSynthesis.cancel();
+  speaking = true;
+
+  const originalText = document.getElementById("text").value;
+  const stretch = parseFloat(document.getElementById("stretch").value);
+  const deharsh = parseFloat(document.getElementById("deharsh").value);
+  const deharsh2 = parseFloat(document.getElementById("deharsh2").value);
+
+  // STACK BOTH
+  let processedText = originalText;
+  processedText = softenText(processedText, deharsh);
+  processedText = softenTextProb(processedText, deharsh2);
+
+  const words = processedText.split(" ");
+  let index = 0;
+
+  function speakChunk(){
+
+    if(index >= words.length){
+      speaking = false;
+      return;
+    }
+
+    const utter = new SpeechSynthesisUtterance(words[index]);
+
+    utter.pitch = 2.0;
+
+    let rate = 1.4 - (stretch * 1.2);
+    if(rate < 0.1) rate = 0.1;
+
+    utter.rate = rate;
+
+    utter.onend = function(){
+      index++;
+      speakChunk();
+    };
+
+    speechSynthesis.speak(utter);
+  }
+
+  speakChunk();
+}
+
+</script>
+
+</body>
+</html>
