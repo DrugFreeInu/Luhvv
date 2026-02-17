@@ -9,7 +9,7 @@
 html, body {
   margin: 0;
   height: 100%;
-  background: black;
+  background: #000;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   color: white;
 }
@@ -21,120 +21,191 @@ body {
   padding: 40px 20px;
 }
 
-#inputField {
+.container {
   width: 100%;
   max-width: 500px;
-  height: 44px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Phrase input */
+#inputField {
+  width: 100%;
+  height: 42px;
   background: transparent;
   border: 1px solid rgba(255,255,255,0.25);
   color: white;
-  font-size: 18px;
-  text-align: center;
+  font-size: 16px;
+  padding: 0 12px;
   outline: none;
 }
 
+/* Buttons under input */
 .buttonRow {
-  margin-top: 18px;
+  margin-top: 10px;
   display: flex;
-  gap: 20px;
+  gap: 10px;
 }
 
 button {
-  width: 110px;
+  flex: 1;
   height: 38px;
   background: transparent;
-  border: 1px solid white;
+  border: 1px solid rgba(255,255,255,0.6);
   color: white;
   cursor: pointer;
+  font-size: 12px;
+  letter-spacing: 1px;
+  transition: opacity 0.15s ease;
 }
 
-/* Tighter control stack */
+button:hover {
+  opacity: 0.85;
+}
+
+/* Sliders */
 .sliderWrap {
-  width: 100%;
-  max-width: 500px;
-  margin-top: 25px;
+  margin-top: 26px;
   display: flex;
   flex-direction: column;
-  gap: 12px; /* reduced vertical spacing */
-  font-size: 11px;
+  gap: 18px;
+  font-size: 10px;
   letter-spacing: 2px;
 }
 
 .sliderWrap label {
-  margin-bottom: -6px; /* pulls label closer */
-  opacity: 0.75;
+  margin-bottom: 4px;
+  opacity: 0.65;
 }
 
-/* Thin black slider */
+/* Base slider */
 input[type=range] {
   appearance: none;
   width: 100%;
-  height: 4px; /* thinner */
-  border-radius: 3px;
+  height: 8px;
+  border-radius: 4px;
   cursor: pointer;
   background: #000;
-  border: 1px solid #111;
-  transition: box-shadow 0.15s ease;
+  border: 1px solid #141414;
 }
 
-/* Hide thumb */
+/* WebKit track */
+input[type=range]::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 4px;
+}
+
+/* Invisible but present thumb */
 input[type=range]::-webkit-slider-thumb {
   appearance: none;
-  width: 0;
-  height: 0;
+  width: 18px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  margin-top: -5px;
+}
+
+input[type=range]::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
 }
 
 input[type=range]::-moz-range-thumb {
-  width: 0;
-  height: 0;
+  width: 18px;
+  height: 18px;
+  background: transparent;
   border: none;
+}
+
+/* Presets */
+#presetList {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.presetItem {
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  font-size: 11px;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.presetItem:hover {
+  opacity: 1;
 }
 </style>
 </head>
 
 <body>
 
-<input id="inputField" type="text" placeholder="Type vocal phrase..." />
+<div class="container">
 
-<div class="buttonRow">
-  <button id="listenBtn">LISTEN</button>
-</div>
+  <input id="inputField" type="text" placeholder="Type phrase..." />
 
-<div class="sliderWrap">
+  <div class="buttonRow">
+    <button id="listenBtn">LISTEN</button>
+    <button id="saveBtn">SAVE</button>
+  </div>
 
-  <label>TONE</label>
-  <input type="range" id="pitchSlider" min="0.5" max="2" step="0.01" value="1">
+  <div class="sliderWrap">
 
-  <label>SPEED</label>
-  <input type="range" id="speedSlider" min="0.5" max="1.5" step="0.01" value="1">
+    <div>
+      <label>TONE</label>
+      <input type="range" id="pitchSlider" min="0.5" max="2" step="0.01" value="1">
+    </div>
 
-  <label>STRETCH</label>
-  <input type="range" id="stretchSlider" min="0" max="1" step="0.01" value="0.5">
+    <div>
+      <label>SPEED</label>
+      <input type="range" id="speedSlider" min="0.5" max="1.5" step="0.01" value="1">
+    </div>
 
-  <label>DE-HARSH</label>
-  <input type="range" id="deharshSlider" min="0" max="1" step="0.01" value="0">
+    <div>
+      <label>STRETCH</label>
+      <input type="range" id="stretchSlider" min="0" max="1" step="0.01" value="0.5">
+    </div>
+
+    <div>
+      <label>DE-HARSH</label>
+      <!-- subtle pre-fill -->
+      <input type="range" id="deharshSlider" min="0" max="1" step="0.01" value="0.06">
+    </div>
+
+  </div>
+
+  <div id="presetList"></div>
 
 </div>
 
 <script>
 
+const input = document.getElementById("inputField");
+const listenBtn = document.getElementById("listenBtn");
+const saveBtn = document.getElementById("saveBtn");
+
+const pitchSlider = document.getElementById("pitchSlider");
+const speedSlider = document.getElementById("speedSlider");
+const stretchSlider = document.getElementById("stretchSlider");
+const deharshSlider = document.getElementById("deharshSlider");
+
 const sliders = document.querySelectorAll("input[type=range]");
+const presetList = document.getElementById("presetList");
 
-/* Yellow fill logic */
+let presets = [];
+
+/* Smooth yellow fill */
 function updateFill(slider) {
-  const min = slider.min ? slider.min : 0;
-  const max = slider.max ? slider.max : 100;
-  const value = slider.value;
-
+  const min = parseFloat(slider.min);
+  const max = parseFloat(slider.max);
+  const value = parseFloat(slider.value);
   const percent = ((value - min) / (max - min)) * 100;
 
   slider.style.background =
-    `linear-gradient(to right, 
-      rgba(255, 216, 77, 0.95) ${percent}%, 
+    `linear-gradient(to right,
+      #FFD84D ${percent}%,
       #000 ${percent}%)`;
-
-  slider.style.boxShadow =
-    `0 0 8px rgba(255, 216, 77, 0.25)`;
 }
 
 sliders.forEach(slider => {
@@ -142,15 +213,7 @@ sliders.forEach(slider => {
   slider.addEventListener("input", () => updateFill(slider));
 });
 
-/* Speech engine */
-
-const input = document.getElementById("inputField");
-const listenBtn = document.getElementById("listenBtn");
-
-const pitchSlider = document.getElementById("pitchSlider");
-const speedSlider = document.getElementById("speedSlider");
-const stretchSlider = document.getElementById("stretchSlider");
-const deharshSlider = document.getElementById("deharshSlider");
+/* Speech Engine */
 
 function softenText(text, amount){
   if(amount === 0) return text;
@@ -164,7 +227,6 @@ function playFrozen(text) {
   speechSynthesis.cancel();
 
   let processed = softenText(text, parseFloat(deharshSlider.value));
-
   const words = processed.split(" ");
   let index = 0;
 
@@ -172,7 +234,6 @@ function playFrozen(text) {
     if(index >= words.length) return;
 
     const utter = new SpeechSynthesisUtterance(words[index]);
-
     utter.pitch = parseFloat(pitchSlider.value);
 
     let rate = parseFloat(speedSlider.value) - (parseFloat(stretchSlider.value) * 0.8);
@@ -196,6 +257,45 @@ listenBtn.addEventListener("click", () => {
   if (!text) return;
   playFrozen(text);
 });
+
+/* Save Presets */
+saveBtn.addEventListener("click", () => {
+  const text = input.value.trim();
+  if (!text) return;
+
+  const preset = {
+    text,
+    pitch: pitchSlider.value,
+    speed: speedSlider.value,
+    stretch: stretchSlider.value,
+    deharsh: deharshSlider.value
+  };
+
+  presets.push(preset);
+  renderPresets();
+});
+
+function renderPresets() {
+  presetList.innerHTML = "";
+
+  presets.forEach((preset) => {
+    const div = document.createElement("div");
+    div.className = "presetItem";
+    div.textContent = preset.text;
+
+    div.addEventListener("click", () => {
+      input.value = preset.text;
+      pitchSlider.value = preset.pitch;
+      speedSlider.value = preset.speed;
+      stretchSlider.value = preset.stretch;
+      deharshSlider.value = preset.deharsh;
+      sliders.forEach(s => updateFill(s));
+    });
+
+    presetList.appendChild(div);
+  });
+}
+
 </script>
 
 </body>
