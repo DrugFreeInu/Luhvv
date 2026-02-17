@@ -29,14 +29,19 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
   padding: 20px;
   box-sizing: border-box;
+  align-items: center;
 }
 
-/* Unified input + buttons style */
+/* Unified width */
+.toolWidth {
+  width: 240px; /* SAME width as slider */
+}
+
+/* Input + Buttons */
 .toolBlock {
-  width: 100%;
   height: 40px;
   background: transparent;
   border: 1px solid rgba(255,255,255,0.6);
@@ -45,19 +50,17 @@ body {
   letter-spacing: 1px;
   padding: 0 12px;
   box-sizing: border-box;
-  outline: none;
   display: flex;
   align-items: center;
   justify-content: center;
+  outline: none;
 }
 
-/* Input specific */
 #inputField {
-  text-align: left;
   border: 1px solid rgba(255,255,255,0.25);
+  text-align: left;
 }
 
-/* Button behavior */
 button.toolBlock {
   cursor: pointer;
   transition: opacity 0.15s ease;
@@ -69,25 +72,29 @@ button.toolBlock:hover {
 
 /* Sliders */
 .sliderWrap {
-  margin-top: 8px;
+  margin-top: 6px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   font-size: 10px;
   letter-spacing: 2px;
-  align-items: center;
+  align-items: flex-start;
 }
 
-.sliderWrap label {
-  margin-bottom: 4px;
+.sliderGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sliderGroup label {
   opacity: 0.65;
 }
 
 /* Slider */
 input[type=range] {
   appearance: none;
-  width: 70%;
-  max-width: 240px;
+  width: 240px;
   height: 8px;
   border-radius: 4px;
   cursor: pointer;
@@ -109,36 +116,11 @@ input[type=range]::-webkit-slider-thumb {
   margin-top: -5px;
 }
 
-input[type=range]::-moz-range-track {
-  height: 8px;
-  border-radius: 4px;
-}
-
 input[type=range]::-moz-range-thumb {
   width: 18px;
   height: 18px;
   background: transparent;
   border: none;
-}
-
-/* Presets */
-#presetList {
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.presetItem {
-  padding: 6px 8px;
-  border: 1px solid rgba(255,255,255,0.2);
-  font-size: 11px;
-  cursor: pointer;
-  opacity: 0.8;
-}
-
-.presetItem:hover {
-  opacity: 1;
 }
 </style>
 </head>
@@ -147,37 +129,35 @@ input[type=range]::-moz-range-thumb {
 
 <div class="container">
 
-  <input id="inputField" class="toolBlock" type="text" placeholder="Type phrase..." />
+  <input id="inputField" class="toolBlock toolWidth" type="text" placeholder="Type phrase..." />
 
-  <button id="listenBtn" class="toolBlock">LISTEN</button>
+  <button id="listenBtn" class="toolBlock toolWidth">LISTEN</button>
 
-  <button id="saveBtn" class="toolBlock">SAVE</button>
+  <button id="saveBtn" class="toolBlock toolWidth">SAVE</button>
 
-  <div class="sliderWrap">
+  <div class="sliderWrap toolWidth">
 
-    <div>
+    <div class="sliderGroup">
       <label>TONE</label>
       <input type="range" id="pitchSlider" min="0.5" max="2" step="0.01" value="1">
     </div>
 
-    <div>
+    <div class="sliderGroup">
       <label>SPEED</label>
       <input type="range" id="speedSlider" min="0.5" max="1.5" step="0.01" value="1">
     </div>
 
-    <div>
+    <div class="sliderGroup">
       <label>STRETCH</label>
       <input type="range" id="stretchSlider" min="0" max="1" step="0.01" value="0.5">
     </div>
 
-    <div>
+    <div class="sliderGroup">
       <label>DE-HARSH</label>
       <input type="range" id="deharshSlider" min="0" max="1" step="0.01" value="0.06">
     </div>
 
   </div>
-
-  <div id="presetList"></div>
 
 </div>
 
@@ -192,9 +172,6 @@ const stretchSlider = document.getElementById("stretchSlider");
 const deharshSlider = document.getElementById("deharshSlider");
 
 const sliders = document.querySelectorAll("input[type=range]");
-const presetList = document.getElementById("presetList");
-
-let presets = [];
 
 /* Smooth yellow fill */
 function updateFill(slider) {
@@ -256,43 +233,6 @@ listenBtn.addEventListener("click", () => {
   if (!text) return;
   playFrozen(text);
 });
-
-saveBtn.addEventListener("click", () => {
-  const text = input.value.trim();
-  if (!text) return;
-
-  const preset = {
-    text,
-    pitch: pitchSlider.value,
-    speed: speedSlider.value,
-    stretch: stretchSlider.value,
-    deharsh: deharshSlider.value
-  };
-
-  presets.push(preset);
-  renderPresets();
-});
-
-function renderPresets() {
-  presetList.innerHTML = "";
-
-  presets.forEach((preset) => {
-    const div = document.createElement("div");
-    div.className = "presetItem";
-    div.textContent = preset.text;
-
-    div.addEventListener("click", () => {
-      input.value = preset.text;
-      pitchSlider.value = preset.pitch;
-      speedSlider.value = preset.speed;
-      stretchSlider.value = preset.stretch;
-      deharshSlider.value = preset.deharsh;
-      sliders.forEach(s => updateFill(s));
-    });
-
-    presetList.appendChild(div);
-  });
-}
 </script>
 
 </body>
