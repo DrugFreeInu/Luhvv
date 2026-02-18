@@ -37,7 +37,8 @@ body {
 .topWrapper{
   position: relative;
   width: 205px;
-  margin-bottom: 12px;
+  margin-top: 20px;      /* moved lower */
+  margin-bottom: 8px;
 }
 
 .topBar{
@@ -108,7 +109,7 @@ body {
 .sliderWrap {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;             /* tighter between sliders */
   font-size: 10px;
   letter-spacing: 2px;
 }
@@ -116,7 +117,7 @@ body {
 .sliderGroup {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;             /* tighter label to slider */
   width: 130px;
 }
 
@@ -124,7 +125,7 @@ body {
   opacity: 0.7;
   font-style: italic;
   transform: skewX(-6deg);
-  margin-bottom: -2px;
+  margin-bottom: -4px;  /* sit right on slider */
 }
 
 input[type=range] {
@@ -151,7 +152,7 @@ input[type=range]::-webkit-slider-thumb {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 120px;
+  height: 105px;    /* adjusted to match new slider height */
 }
 
 .toolBlock {
@@ -256,7 +257,6 @@ const speedSlider = document.getElementById("speedSlider");
 const stretchSlider = document.getElementById("stretchSlider");
 const deharshSlider = document.getElementById("deharshSlider");
 
-/* ===== SLIDER FILL ===== */
 function updateFill(slider) {
   const min = parseFloat(slider.min);
   const max = parseFloat(slider.max);
@@ -271,19 +271,17 @@ sliders.forEach(slider => {
   slider.addEventListener("input", () => updateFill(slider));
 });
 
-/* ===== AUDIO ===== */
+/* Audio */
 function softenText(text, amount){
   if(amount === 0) return text;
-  return text
-    .replace(/p/gi,"b")
-    .replace(/t/gi,"d")
-    .replace(/k/gi,"g")
-    .replace(/s/gi,"z");
+  return text.replace(/p/gi,"b")
+             .replace(/t/gi,"d")
+             .replace(/k/gi,"g")
+             .replace(/s/gi,"z");
 }
 
 function playFrozen(text) {
   speechSynthesis.cancel();
-
   let processed = softenText(text, parseFloat(deharshSlider.value));
   const words = processed.split(" ");
   let index = 0;
@@ -317,14 +315,13 @@ listenBtn.addEventListener("click", () => {
   playFrozen(text);
 });
 
-/* ===== DROPDOWN ===== */
+/* Dropdown */
 toggle.addEventListener("click", () => {
   const isOpen = dropdown.style.display === "flex";
   dropdown.style.display = isOpen ? "none" : "flex";
   toggle.classList.toggle("open", !isOpen);
 });
 
-/* ===== SAVE INTO DROPDOWN ===== */
 saveBtn.addEventListener("click", () => {
   const text = input.value.trim();
   if(!text) return;
