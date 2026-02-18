@@ -18,7 +18,7 @@ html, body {
 /* Layout */
 body {
   display: flex;
-  justify-content: flex-start;   /* left aligned */
+  justify-content: flex-start;
   align-items: center;
 }
 
@@ -32,21 +32,21 @@ body {
   gap: 14px;
   padding: 20px;
   box-sizing: border-box;
-  align-items: flex-start;       /* left aligned */
+  align-items: flex-start;
 }
 
-/* Button Grid */
+/* 2x2 Control Grid */
 .controlGrid {
   display: grid;
   grid-template-columns: repeat(2, auto);
   gap: 10px 14px;
-  margin-left: 10px;             /* small wall offset */
+  margin-left: 10px;
 }
 
-/* Buttons */
+/* Shared size */
 .toolBlock {
   width: 70%;
-  max-width: 90px;               /* widened from 60 */
+  max-width: 90px;
   box-sizing: border-box;
   height: 36px;
   background: transparent;
@@ -54,7 +54,7 @@ body {
   color: white;
   font-size: 12px;
   letter-spacing: 2px;
-  padding: 0 10px;
+  padding: 0 8px;
   outline: none;
   display: flex;
   align-items: center;
@@ -62,6 +62,15 @@ body {
   text-transform: uppercase;
 }
 
+/* TYPE input styling */
+#inputField {
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.35);
+  text-transform: none; /* allow normal typing */
+  letter-spacing: 1px;
+}
+
+/* Buttons */
 button.toolBlock {
   cursor: pointer;
   transition: opacity 0.15s ease, border-color 0.15s ease;
@@ -102,7 +111,6 @@ button.toolBlock:hover {
   margin: 0;
 }
 
-/* Slider */
 input[type=range] {
   appearance: none;
   width: 100%;
@@ -112,11 +120,6 @@ input[type=range] {
   background: #000;
   border: 1px solid #141414;
   margin: 0;
-}
-
-input[type=range]::-webkit-slider-runnable-track {
-  height: 8px;
-  border-radius: 4px;
 }
 
 input[type=range]::-webkit-slider-thumb {
@@ -163,9 +166,9 @@ input[type=range]::-moz-range-thumb {
 <div class="container">
 
   <div class="controlGrid">
-    <button id="typeBtn" class="toolBlock">TYPE</button>
+    <input id="inputField" class="toolBlock" type="text" placeholder="TYPE">
     <button id="listenBtn" class="toolBlock">TEST</button>
-    <button id="editBtn" class="toolBlock">EDIT</button>
+    <button id="menuBtn" class="toolBlock">MENU</button>
     <button id="saveBtn" class="toolBlock">SAVE</button>
   </div>
 
@@ -198,6 +201,7 @@ input[type=range]::-moz-range-thumb {
 </div>
 
 <script>
+const input = document.getElementById("inputField");
 const listenBtn = document.getElementById("listenBtn");
 const saveBtn = document.getElementById("saveBtn");
 
@@ -210,9 +214,7 @@ const sliders = document.querySelectorAll("input[type=range]");
 const presetList = document.getElementById("presetList");
 
 let presets = [];
-let currentText = "";
 
-/* Slider fill */
 function updateFill(slider) {
   const min = parseFloat(slider.min);
   const max = parseFloat(slider.max);
@@ -220,9 +222,7 @@ function updateFill(slider) {
   const percent = ((value - min) / (max - min)) * 100;
 
   slider.style.background =
-    `linear-gradient(to right,
-      #FFD84D ${percent}%,
-      #000 ${percent}%)`;
+    `linear-gradient(to right,#FFD84D ${percent}%,#000 ${percent}%)`;
 }
 
 sliders.forEach(slider => {
@@ -230,7 +230,6 @@ sliders.forEach(slider => {
   slider.addEventListener("input", () => updateFill(slider));
 });
 
-/* Speech */
 function softenText(text, amount){
   if(amount === 0) return text;
   return text.replace(/p/gi,"b")
@@ -269,15 +268,17 @@ function playFrozen(text) {
 }
 
 listenBtn.addEventListener("click", () => {
-  if (!currentText) return;
-  playFrozen(currentText);
+  const text = input.value.trim();
+  if (!text) return;
+  playFrozen(text);
 });
 
 saveBtn.addEventListener("click", () => {
-  if (!currentText) return;
+  const text = input.value.trim();
+  if (!text) return;
 
   const preset = {
-    text: currentText,
+    text,
     pitch: pitchSlider.value,
     speed: speedSlider.value,
     stretch: stretchSlider.value,
@@ -297,7 +298,7 @@ function renderPresets() {
     div.textContent = preset.text;
 
     div.addEventListener("click", () => {
-      currentText = preset.text;
+      input.value = preset.text;
       pitchSlider.value = preset.pitch;
       speedSlider.value = preset.speed;
       stretchSlider.value = preset.stretch;
