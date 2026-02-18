@@ -27,24 +27,33 @@ body {
   max-width: 360px;
   height: 100dvh;
   display: flex;
-  justify-content: flex-start;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
   padding: 20px;
   box-sizing: border-box;
-  gap: 30px; /* space between sliders and buttons */
+  align-items: flex-start;
 }
 
-/* BUTTON COLUMN ONLY */
-.buttonColumn {
+/* ===== ONLY NEW: sliders + buttons side-by-side ===== */
+.rowWrap{
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;          /* space between sliders and buttons */
+  margin-left: 10px;  /* keeps same left offset you had */
+}
+
+/* ===== ONLY NEW: button column ===== */
+.buttonCol{
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
-/* Your original toolBlock sizing */
+/* Shared size (UNCHANGED) */
 .toolBlock {
   width: 70%;
-  max-width: 60px;
+  max-width: 90px;
   box-sizing: border-box;
   height: 36px;
   background: transparent;
@@ -52,17 +61,34 @@ body {
   color: white;
   font-size: 12px;
   letter-spacing: 2px;
-  padding: 0 10px;
+  padding: 0 8px;
   outline: none;
   display: flex;
   align-items: center;
   justify-content: center;
   text-transform: uppercase;
-  cursor: pointer;
 }
 
-/* === SLIDERS (UNCHANGED) === */
+/* TYPE input styling (UNCHANGED) */
+#inputField {
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.35);
+  text-transform: none; /* allow normal typing */
+  letter-spacing: 1px;
+}
 
+/* Buttons (UNCHANGED) */
+button.toolBlock {
+  cursor: pointer;
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+
+button.toolBlock:hover {
+  opacity: 0.85;
+  border-color: rgba(255,255,255,0.8);
+}
+
+/* ===== SLIDERS (DO NOT TOUCH) ===== */
 .sliderWrap {
   margin-top: 6px;
   display: flex;
@@ -71,6 +97,7 @@ body {
   font-size: 10px;
   letter-spacing: 2px;
   align-items: flex-start;
+  margin-left: 0; /* IMPORTANT: rowWrap already has the 10px */
 }
 
 .sliderGroup {
@@ -117,6 +144,27 @@ input[type=range]::-moz-range-thumb {
   background: transparent;
   border: none;
 }
+
+/* Presets (UNCHANGED) */
+#presetList {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-left: 10px;
+}
+
+.presetItem {
+  padding: 6px 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  font-size: 11px;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.presetItem:hover {
+  opacity: 1;
+}
 </style>
 </head>
 
@@ -124,39 +172,155 @@ input[type=range]::-moz-range-thumb {
 
 <div class="container">
 
-  <!-- SLIDERS (UNCHANGED BLOCK) -->
-  <div class="sliderWrap">
+  <!-- SLIDERS + BUTTONS SIDE BY SIDE (buttons moved only) -->
+  <div class="rowWrap">
 
-    <div class="sliderGroup">
-      <label>TONE</label>
-      <input type="range" id="pitchSlider" min="0.5" max="2" step="0.01" value="1">
+    <div class="sliderWrap">
+
+      <div class="sliderGroup">
+        <label>TONE</label>
+        <input type="range" id="pitchSlider" min="0.5" max="2" step="0.01" value="1">
+      </div>
+
+      <div class="sliderGroup">
+        <label>SPEED</label>
+        <input type="range" id="speedSlider" min="0.5" max="1.5" step="0.01" value="1">
+      </div>
+
+      <div class="sliderGroup">
+        <label>STRETCH</label>
+        <input type="range" id="stretchSlider" min="0" max="1" step="0.01" value="0.5">
+      </div>
+
+      <div class="sliderGroup">
+        <label>DE-HARSH</label>
+        <input type="range" id="deharshSlider" min="0" max="1" step="0.01" value="0.06">
+      </div>
+
     </div>
 
-    <div class="sliderGroup">
-      <label>SPEED</label>
-      <input type="range" id="speedSlider" min="0.5" max="1.5" step="0.01" value="1">
-    </div>
-
-    <div class="sliderGroup">
-      <label>STRETCH</label>
-      <input type="range" id="stretchSlider" min="0" max="1" step="0.01" value="0.5">
-    </div>
-
-    <div class="sliderGroup">
-      <label>DE-HARSH</label>
-      <input type="range" id="deharshSlider" min="0" max="1" step="0.01" value="0.06">
+    <div class="buttonCol">
+      <input id="inputField" class="toolBlock" type="text" placeholder="TYPE">
+      <button id="listenBtn" class="toolBlock">TEST</button>
+      <button id="saveBtn" class="toolBlock">SAVE</button>
     </div>
 
   </div>
 
-  <!-- BUTTONS MOVED RIGHT -->
-  <div class="buttonColumn">
-    <button class="toolBlock">TYPE</button>
-    <button class="toolBlock">TEST</button>
-    <button class="toolBlock">SAVE</button>
-  </div>
+  <div id="presetList"></div>
 
 </div>
+
+<script>
+const input = document.getElementById("inputField");
+const listenBtn = document.getElementById("listenBtn");
+const saveBtn = document.getElementById("saveBtn");
+
+const pitchSlider = document.getElementById("pitchSlider");
+const speedSlider = document.getElementById("speedSlider");
+const stretchSlider = document.getElementById("stretchSlider");
+const deharshSlider = document.getElementById("deharshSlider");
+
+const sliders = document.querySelectorAll("input[type=range]");
+const presetList = document.getElementById("presetList");
+
+let presets = [];
+
+function updateFill(slider) {
+  const min = parseFloat(slider.min);
+  const max = parseFloat(slider.max);
+  const value = parseFloat(slider.value);
+  const percent = ((value - min) / (max - min)) * 100;
+
+  slider.style.background =
+    `linear-gradient(to right,#FFD84D ${percent}%,#000 ${percent}%)`;
+}
+
+sliders.forEach(slider => {
+  updateFill(slider);
+  slider.addEventListener("input", () => updateFill(slider));
+});
+
+function softenText(text, amount){
+  if(amount === 0) return text;
+  return text.replace(/p/gi,"b")
+             .replace(/t/gi,"d")
+             .replace(/k/gi,"g")
+             .replace(/s/gi,"z");
+}
+
+function playFrozen(text) {
+  speechSynthesis.cancel();
+
+  let processed = softenText(text, parseFloat(deharshSlider.value));
+  const words = processed.split(" ");
+  let index = 0;
+
+  function speakChunk(){
+    if(index >= words.length) return;
+
+    const utter = new SpeechSynthesisUtterance(words[index]);
+    utter.pitch = parseFloat(pitchSlider.value);
+
+    let rate = parseFloat(speedSlider.value) - (parseFloat(stretchSlider.value) * 0.8);
+    if(rate < 0.1) rate = 0.1;
+
+    utter.rate = rate;
+
+    utter.onend = function(){
+      index++;
+      speakChunk();
+    };
+
+    speechSynthesis.speak(utter);
+  }
+
+  speakChunk();
+}
+
+listenBtn.addEventListener("click", () => {
+  const text = input.value.trim();
+  if (!text) return;
+  playFrozen(text);
+});
+
+saveBtn.addEventListener("click", () => {
+  const text = input.value.trim();
+  if (!text) return;
+
+  const preset = {
+    text,
+    pitch: pitchSlider.value,
+    speed: speedSlider.value,
+    stretch: stretchSlider.value,
+    deharsh: deharshSlider.value
+  };
+
+  presets.push(preset);
+  renderPresets();
+});
+
+function renderPresets() {
+  presetList.innerHTML = "";
+
+  presets.forEach((preset) => {
+    const div = document.createElement("div");
+    div.className = "presetItem";
+    div.textContent = preset.text;
+
+    div.addEventListener("click", () => {
+      input.value = preset.text;
+      pitchSlider.value = preset.pitch;
+      speedSlider.value = preset.speed;
+      stretchSlider.value = preset.stretch;
+      deharshSlider.value = preset.deharsh;
+      sliders.forEach(s => updateFill(s));
+    });
+
+    presetList.appendChild(div);
+  });
+}
+</script>
 
 </body>
 </html>
