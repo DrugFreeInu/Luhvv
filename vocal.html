@@ -38,7 +38,7 @@ body {
 .rowWrap{
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 28px;
   margin-left: 10px;
 }
 
@@ -46,21 +46,21 @@ body {
 .buttonCol{
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
   justify-content: center;
 }
 
-/* Smaller tighter buttons */
+/* Tighter buttons */
 .toolBlock {
   width: auto;
-  min-width: 64px;
-  height: 30px;                 /* smaller */
-  padding: 0 10px;              /* tighter */
+  min-width: 72px;
+  height: 34px;
+  padding: 0 14px;
   background: transparent;
   border: 1px solid rgba(255,255,255,0.55);
   color: white;
-  font-size: 11px;              /* slightly smaller */
-  letter-spacing: 1.5px;        /* slightly tighter */
+  font-size: 12px;
+  letter-spacing: 2px;
   outline: none;
   display: flex;
   align-items: center;
@@ -88,7 +88,7 @@ button.toolBlock:hover {
   border-color: rgba(255,255,255,0.8);
 }
 
-/* ===== SLIDERS (UNCHANGED) ===== */
+/* ===== SLIDERS (UNTOUCHED) ===== */
 .sliderWrap {
   display: flex;
   flex-direction: column;
@@ -211,7 +211,143 @@ input[type=range]::-moz-range-thumb {
 </div>
 
 <script>
-/* existing logic untouched */
+const input = document.getElementById("inputField");
+const listenBtn = document.getElementById("listenBtn");
+const saveBtn = document.getElementById("saveBtn");
+const undoBtn = document.getElementById("undoBtn");
+const redoBtn = document.getElementById("redoBtn");
+
+const pitchSlider = document.getElementById("pitchSlider");
+const speedSlider = document.getElementById("speedSlider");
+const stretchSlider = document.getElementById("stretchSlider");
+const deharshSlider = document.getElementById("deharshSlider");
+
+const sliders = document.querySelectorAll("input[type=range]");
+const presetList = document.getElementById("presetList");
+
+let presets = [];
+
+/* ===== UNDO / REDO STACK ===== */
+let history = [];
+let historyIndex = -1;
+
+function saveHistory(value){
+  if(historyIndex < history.length - 1){
+    history = history.slice(0, historyIndex + 1);
+  }
+  history.push(value);
+  historyIndex++;
+}
+
+input.addEventListener("input", () => {
+  saveHistory(input.value);
+});
+
+undoBtn.addEventListener("click", () => {
+  if(historyIndex > 0){
+    historyIndex--;
+    input.value = history[historyIndex];
+  }
+});
+
+redoBtn.addEventListener("click", () => {
+  if(historyIndex < history.length - 1){
+    historyIndex++;
+    input.value = history[historyIndex];
+  }
+});
+
+/* ===== SLIDER FILL (UNCHANGED) ===== */
+function updateFill(slider) {
+  const min = parseFloat(slider.min);
+  const max = parseFloat(slider.max);
+  const value = parseFloat(slider.value);
+  const percent = ((value - min) / (max - min)) * 100;
+  slider.style.background =
+    `linear-gradient(to right,#FFD84D ${percent}%,#000 ${percent}%)`;
+}
+
+sliders.forEach(slider => {
+  updateFill(slider);
+  slider.addEventListener("input", () => updateFill(slider));
+});
+
+/* ===== AUDIO ===== */
+function softenText(text, amount){
+  if(amount === 0) return text;
+  return text.replace(/p/gi,"b")
+             .replace(/t/gi,"d")
+             .replace(/k/gi,"g")
+             .replace(/s/gi,"z");
+}
+
+function playFrozen(text) {
+  speechSynthesis.cancel();
+  let processed = softenText(text, parseFloat(deharshSlider.value));
+  const words = processed.split(" ");
+  let index = 0;
+
+  function speakChunk(){
+    if(index >= words.length) return;
+    const utter = new SpeechSynthesisUtterance(words[index]);
+    utter.pitch = parseFloat(pitchSlider.value);
+
+    let rate = parseFloat(speedSlider.value) - 
+               (parseFloat(stretchSlider.value) * 0.8);
+    if(rate < 0.1) rate = 0.1;
+
+    utter.rate = rate;
+    utter.onend = function(){
+      index++;
+      speakChunk();
+    };
+    speechSynthesis.speak(utter);
+  }
+
+  speakChunk();
+}
+
+listenBtn.addEventListener("click", () => {
+  const text = input.value.trim();
+  if (!text) return;
+  playFrozen(text);
+});
+
+saveBtn.addEventListener("click", () => {
+  const text = input.value.trim();
+  if (!text) return;
+
+  const preset = {
+    text,
+    pitch: pitchSlider.value,
+    speed: speedSlider.value,
+    stretch: stretchSlider.value,
+    deharsh: deharshSlider.value
+  };
+
+  presets.push(preset);
+  renderPresets();
+});
+
+function renderPresets() {
+  presetList.innerHTML = "";
+  presets.forEach((preset) => {
+    const div = document.createElement("div");
+    div.className = "presetItem";
+    div.textContent = preset.text;
+
+    div.addEventListener("click", () => {
+      input.value = preset.text;
+      pitchSlider.value = preset.pitch;
+      speedSlider.value = preset.speed;
+      stretchSlider.value = preset.stretch;
+      deharshSlider.value = preset.deharsh;
+      sliders.forEach(s => updateFill(s));
+    });
+
+    presetList.appendChild(div);
+  });
+}
 </script>
 
 </body>
