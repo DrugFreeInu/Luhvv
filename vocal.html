@@ -88,7 +88,7 @@ button.toolBlock:hover {
   border-color: rgba(255,255,255,0.8);
 }
 
-/* ===== SLIDERS (UNTOUCHED) ===== */
+/* ===== SLIDERS ===== */
 .sliderWrap {
   display: flex;
   flex-direction: column;
@@ -102,8 +102,7 @@ button.toolBlock:hover {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  width: 70%;
-  max-width: 240px;
+  width: 260px;   /* ← restored larger size */
   box-sizing: border-box;
 }
 
@@ -227,7 +226,7 @@ const presetList = document.getElementById("presetList");
 
 let presets = [];
 
-/* ===== UNDO / REDO STACK ===== */
+/* UNDO / REDO */
 let history = [];
 let historyIndex = -1;
 
@@ -257,7 +256,7 @@ redoBtn.addEventListener("click", () => {
   }
 });
 
-/* ===== SLIDER FILL (UNCHANGED) ===== */
+/* Slider Fill */
 function updateFill(slider) {
   const min = parseFloat(slider.min);
   const max = parseFloat(slider.max);
@@ -272,7 +271,7 @@ sliders.forEach(slider => {
   slider.addEventListener("input", () => updateFill(slider));
 });
 
-/* ===== AUDIO ===== */
+/* Audio */
 function softenText(text, amount){
   if(amount === 0) return text;
   return text.replace(/p/gi,"b")
@@ -292,7 +291,7 @@ function playFrozen(text) {
     const utter = new SpeechSynthesisUtterance(words[index]);
     utter.pitch = parseFloat(pitchSlider.value);
 
-    let rate = parseFloat(speedSlider.value) - 
+    let rate = parseFloat(speedSlider.value) -
                (parseFloat(stretchSlider.value) * 0.8);
     if(rate < 0.1) rate = 0.1;
 
