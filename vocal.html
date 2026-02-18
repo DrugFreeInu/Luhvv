@@ -33,50 +33,58 @@ body {
   align-items: flex-start;
 }
 
-/* ===== TOP BAR ===== */
+/* ===== VOCALS BOX ===== */
 .topWrapper{
   position: relative;
   width: 205px;
-  margin-bottom: 6px; /* lowered closer to TONE */
+  margin-bottom: 12px;
 }
 
 .topBar{
   width: 100%;
-  height: 20px;
-  border: 1px solid rgba(255,255,255,0.35);
+  height: 24px;
+  border: 1px solid rgba(255,255,255,0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 2px;
   font-style: italic;
   transform: skewX(-6deg);
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 .topBar span {
   transform: skewX(6deg);
-  color: white;
 }
 
 .arrow{
-  margin-left: 6px;
+  margin-left: 8px;
   width: 6px;
   height: 6px;
   border-right: 1px solid white;
   border-bottom: 1px solid white;
   transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+/* rotate when open */
+.topBar.open .arrow{
+  transform: rotate(-135deg);
 }
 
 /* ===== DROPDOWN ===== */
 .dropdown {
   position: absolute;
-  top: 24px;
+  top: 26px;
   width: 100%;
-  border: 1px solid rgba(255,255,255,0.25);
-  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.35);
+  background: rgba(0,0,0,0.85);
   display: none;
   flex-direction: column;
+  box-sizing: border-box;
+  z-index: 10;
 }
 
 .dropdownItem{
@@ -97,11 +105,11 @@ body {
   gap: 15px;
 }
 
-/* ===== SLIDERS (TIGHTER) ===== */
+/* ===== SLIDERS ===== */
 .sliderWrap {
   display: flex;
   flex-direction: column;
-  gap: 4px; /* tighter stack */
+  gap: 10px;
   font-size: 10px;
   letter-spacing: 2px;
 }
@@ -109,18 +117,15 @@ body {
 .sliderGroup {
   display: flex;
   flex-direction: column;
+  gap: 2px;
   width: 130px;
-  margin: 0;
 }
 
 .sliderGroup label {
-  font-size: 9px;
-  letter-spacing: 2px;
+  opacity: 0.7;
   font-style: italic;
   transform: skewX(-6deg);
-  margin-bottom: -2px; /* sits almost on rail */
-  padding-left: 1px;
-  opacity: 0.8;
+  margin-bottom: -2px;
 }
 
 input[type=range] {
@@ -147,10 +152,9 @@ input[type=range]::-webkit-slider-thumb {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 105px;
+  height: 120px;
 }
 
-/* Button shape */
 .toolBlock {
   width: 60px;
   height: 33px;
@@ -168,28 +172,26 @@ input[type=range]::-webkit-slider-thumb {
   transform: skewX(12deg);
   font-size: 11px;
   letter-spacing: 2px;
-  color: white;
 }
 
-/* TYPE input */
-#inputField {
-  text-align: center;
-  border: 1px solid rgba(255,255,255,0.35);
-  color: white;
-}
-
-#inputField::placeholder{
-  color: white;
-  opacity: 0.6;
-}
-
-/* TEST opposite tilt */
 #listenBtn {
   transform: skewX(12deg);
 }
 
 #listenBtn span {
   transform: skewX(-12deg);
+}
+
+#inputField {
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.35);
+  color: white;
+  transform: skewX(-12deg);
+}
+
+#inputField::placeholder{
+  color: white;
+  opacity: 0.6;
 }
 </style>
 </head>
@@ -203,7 +205,6 @@ input[type=range]::-webkit-slider-thumb {
       <span>VOCALS</span>
       <div class="arrow"></div>
     </div>
-
     <div class="dropdown" id="vocalDropdown"></div>
   </div>
 
@@ -250,12 +251,12 @@ const toggle = document.getElementById("vocalToggle");
 const saveBtn = document.getElementById("saveBtn");
 const input = document.getElementById("inputField");
 
+/* Slider fill logic untouched */
 function updateFill(slider) {
   const min = parseFloat(slider.min);
   const max = parseFloat(slider.max);
   const value = parseFloat(slider.value);
   const percent = ((value - min) / (max - min)) * 100;
-
   slider.style.background =
     `linear-gradient(to right,#FFD84D ${percent}%,#000 ${percent}%)`;
 }
@@ -265,25 +266,29 @@ sliders.forEach(slider => {
   slider.addEventListener("input", () => updateFill(slider));
 });
 
+/* Dropdown toggle */
 toggle.addEventListener("click", () => {
-  dropdown.style.display =
-    dropdown.style.display === "flex" ? "none" : "flex";
+  const isOpen = dropdown.style.display === "flex";
+  dropdown.style.display = isOpen ? "none" : "flex";
+  toggle.classList.toggle("open", !isOpen);
 });
 
+/* Save into dropdown */
 saveBtn.addEventListener("click", () => {
   const text = input.value.trim();
   if(!text) return;
 
-  const preset = document.createElement("div");
-  preset.className = "dropdownItem";
-  preset.textContent = text;
+  const item = document.createElement("div");
+  item.className = "dropdownItem";
+  item.textContent = text;
 
-  preset.addEventListener("click", () => {
+  item.addEventListener("click", () => {
     input.value = text;
     dropdown.style.display = "none";
+    toggle.classList.remove("open");
   });
 
-  dropdown.appendChild(preset);
+  dropdown.appendChild(item);
 });
 </script>
 
