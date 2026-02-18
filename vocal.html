@@ -18,7 +18,7 @@ html, body {
 /* Layout */
 body {
   display: flex;
-  justify-content: flex-start; /* ✅ correct flex value */
+  justify-content: flex-start;
   align-items: center;
 }
 
@@ -29,12 +29,20 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 10px;
-  padding: 20px 20px 20px 0px; /* ✅ removed left padding */
+  gap: 14px;
+  padding: 20px 20px 20px 0px;
   box-sizing: border-box;
-  align-items: center;
+  align-items: flex-start;
 }
 
+/* === CONTROL GRID === */
+.controlGrid {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 8px 12px;
+}
+
+/* Buttons / Input */
 .toolBlock {
   width: 70%;
   max-width: 60px;
@@ -53,14 +61,11 @@ body {
   text-transform: uppercase;
 }
 
-/* Input */
 #inputField {
   text-align: center;
   border: 1px solid rgba(255,255,255,0.25);
-  letter-spacing: 1px;
 }
 
-/* Button behavior */
 button.toolBlock {
   cursor: pointer;
   transition: opacity 0.15s ease, border-color 0.15s ease;
@@ -79,7 +84,7 @@ button.toolBlock:hover {
   gap: 14px;
   font-size: 10px;
   letter-spacing: 2px;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .sliderGroup {
@@ -110,11 +115,6 @@ input[type=range] {
   background: #000;
   border: 1px solid #141414;
   margin: 0;
-}
-
-input[type=range]::-webkit-slider-runnable-track {
-  height: 8px;
-  border-radius: 4px;
 }
 
 input[type=range]::-webkit-slider-thumb {
@@ -159,11 +159,13 @@ input[type=range]::-moz-range-thumb {
 
 <div class="container">
 
-  <input id="inputField" class="toolBlock" type="text" placeholder="TYPE" />
-
-  <button id="listenBtn" class="toolBlock">TEST</button>
-
-  <button id="saveBtn" class="toolBlock">SAVE</button>
+  <!-- NEW GRID -->
+  <div class="controlGrid">
+    <input id="inputField" class="toolBlock" type="text" placeholder="TYPE">
+    <button id="listenBtn" class="toolBlock">TEST</button>
+    <button id="editBtn" class="toolBlock">EDIT</button>
+    <button id="saveBtn" class="toolBlock">SAVE</button>
+  </div>
 
   <div class="sliderWrap">
 
@@ -197,6 +199,7 @@ input[type=range]::-moz-range-thumb {
 const input = document.getElementById("inputField");
 const listenBtn = document.getElementById("listenBtn");
 const saveBtn = document.getElementById("saveBtn");
+const editBtn = document.getElementById("editBtn");
 
 const pitchSlider = document.getElementById("pitchSlider");
 const speedSlider = document.getElementById("speedSlider");
@@ -215,9 +218,7 @@ function updateFill(slider) {
   const percent = ((value - min) / (max - min)) * 100;
 
   slider.style.background =
-    `linear-gradient(to right,
-      #FFD84D ${percent}%,
-      #000 ${percent}%)`;
+    `linear-gradient(to right,#FFD84D ${percent}%,#000 ${percent}%)`;
 }
 
 sliders.forEach(slider => {
@@ -235,7 +236,6 @@ function softenText(text, amount){
 
 function playFrozen(text) {
   speechSynthesis.cancel();
-
   let processed = softenText(text, parseFloat(deharshSlider.value));
   const words = processed.split(" ");
   let index = 0;
@@ -248,7 +248,6 @@ function playFrozen(text) {
 
     let rate = parseFloat(speedSlider.value) - (parseFloat(stretchSlider.value) * 0.8);
     if(rate < 0.1) rate = 0.1;
-
     utter.rate = rate;
 
     utter.onend = function(){
@@ -284,14 +283,17 @@ saveBtn.addEventListener("click", () => {
   renderPresets();
 });
 
+/* EDIT just focuses the input */
+editBtn.addEventListener("click", () => {
+  input.focus();
+});
+
 function renderPresets() {
   presetList.innerHTML = "";
-
   presets.forEach((preset) => {
     const div = document.createElement("div");
     div.className = "presetItem";
     div.textContent = preset.text;
-
     div.addEventListener("click", () => {
       input.value = preset.text;
       pitchSlider.value = preset.pitch;
@@ -300,7 +302,6 @@ function renderPresets() {
       deharshSlider.value = preset.deharsh;
       sliders.forEach(s => updateFill(s));
     });
-
     presetList.appendChild(div);
   });
 }
