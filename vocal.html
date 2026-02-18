@@ -34,15 +34,43 @@ body {
   align-items: flex-start;
 }
 
+/* ===== TOP BAR ===== */
+.topBar{
+  width: 205px;
+  height: 30px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-style: italic;
+  transform: skewX(-6deg);
+  cursor: pointer;
+}
+
+.topBar span {
+  transform: skewX(6deg);
+}
+
+.arrow{
+  margin-left: 8px;
+  width: 6px;
+  height: 6px;
+  border-right: 1px solid white;
+  border-bottom: 1px solid white;
+  transform: rotate(45deg);
+}
+
 /* Row layout */
 .rowWrap{
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 60px;
+  gap: 15px;
 }
 
-/* ===== SLIDERS (UNCHANGED LOGIC) ===== */
+/* ===== SLIDERS (UNCHANGED) ===== */
 .sliderWrap {
   display: flex;
   flex-direction: column;
@@ -57,16 +85,12 @@ body {
   flex-direction: column;
   gap: 4px;
   width: 130px;
-  box-sizing: border-box;
 }
 
 .sliderGroup label {
   opacity: 0.7;
   font-style: italic;
   transform: skewX(-6deg);
-  letter-spacing: 1.5px;
-  line-height: 1;
-  margin: 0;
 }
 
 input[type=range] {
@@ -77,7 +101,6 @@ input[type=range] {
   cursor: pointer;
   background: #000;
   border: 1px solid #141414;
-  margin: 0;
 }
 
 input[type=range]::-webkit-slider-thumb {
@@ -89,76 +112,47 @@ input[type=range]::-webkit-slider-thumb {
   margin-top: -5px;
 }
 
-input[type=range]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  background: transparent;
-  border: none;
-}
-
-/* ===== BUTTON COLUMN (FIXED EVEN DISTRIBUTION) ===== */
+/* ===== BUTTON COLUMN ===== */
 .buttonCol{
   display: flex;
   flex-direction: column;
-  justify-content: space-between;  /* evenly spread buttons */
-  height: 120px;                   /* match slider column height */
+  justify-content: space-between;
+  height: 120px;
 }
 
-/* Buttons */
+/* Base Button Shape (italicized shape) */
 .toolBlock {
-  width: 55px;
+  width: 60px;
   height: 33px;
   background: transparent;
   border: 1px solid rgba(255,255,255,0.55);
-  color: white;
-  font-size: 12px;
-  letter-spacing: 2px;
-  outline: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-transform: uppercase;
+  transform: skewX(-12deg);   /* shape tilt */
   box-sizing: border-box;
 }
 
-/* TYPE input */
+/* Text inside corrected */
+.toolBlock span {
+  transform: skewX(12deg);   /* unskew text */
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+
+/* TYPE input styled same shape */
 #inputField {
   text-align: center;
   border: 1px solid rgba(255,255,255,0.35);
-  text-transform: none;
-  letter-spacing: 1px;
 }
 
-/* Hover */
-button.toolBlock {
-  cursor: pointer;
-  transition: opacity 0.15s ease, border-color 0.15s ease;
+/* TEST button slanted opposite */
+#listenBtn {
+  transform: skewX(12deg);
 }
 
-button.toolBlock:hover {
-  opacity: 0.85;
-  border-color: rgba(255,255,255,0.8);
-}
-
-/* Presets */
-#presetList {
-  margin-top: 16px;
-  margin-left: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.presetItem {
-  padding: 6px 8px;
-  border: 1px solid rgba(255,255,255,0.2);
-  font-size: 11px;
-  cursor: pointer;
-  opacity: 0.8;
-}
-
-.presetItem:hover {
-  opacity: 1;
+#listenBtn span {
+  transform: skewX(-12deg);
 }
 </style>
 </head>
@@ -166,6 +160,11 @@ button.toolBlock:hover {
 <body>
 
 <div class="container">
+
+  <div class="topBar">
+    <span>VOCALS</span>
+    <div class="arrow"></div>
+  </div>
 
   <div class="rowWrap">
 
@@ -195,36 +194,23 @@ button.toolBlock:hover {
 
     <div class="buttonCol">
       <input id="inputField" class="toolBlock" type="text" placeholder="TYPE">
-      <button id="listenBtn" class="toolBlock">TEST</button>
-      <button id="saveBtn" class="toolBlock">SAVE</button>
+      <button id="listenBtn" class="toolBlock"><span>TEST</span></button>
+      <button id="saveBtn" class="toolBlock"><span>SAVE</span></button>
     </div>
 
   </div>
 
-  <div id="presetList"></div>
-
 </div>
 
 <script>
-const input = document.getElementById("inputField");
-const listenBtn = document.getElementById("listenBtn");
-const saveBtn = document.getElementById("saveBtn");
-
-const pitchSlider = document.getElementById("pitchSlider");
-const speedSlider = document.getElementById("speedSlider");
-const stretchSlider = document.getElementById("stretchSlider");
-const deharshSlider = document.getElementById("deharshSlider");
-
 const sliders = document.querySelectorAll("input[type=range]");
-const presetList = document.getElementById("presetList");
-
-let presets = [];
 
 function updateFill(slider) {
   const min = parseFloat(slider.min);
   const max = parseFloat(slider.max);
   const value = parseFloat(slider.value);
   const percent = ((value - min) / (max - min)) * 100;
+
   slider.style.background =
     `linear-gradient(to right,#FFD84D ${percent}%,#000 ${percent}%)`;
 }
@@ -233,82 +219,6 @@ sliders.forEach(slider => {
   updateFill(slider);
   slider.addEventListener("input", () => updateFill(slider));
 });
-
-function softenText(text, amount){
-  if(amount === 0) return text;
-  return text.replace(/p/gi,"b")
-             .replace(/t/gi,"d")
-             .replace(/k/gi,"g")
-             .replace(/s/gi,"z");
-}
-
-function playFrozen(text) {
-  speechSynthesis.cancel();
-  let processed = softenText(text, parseFloat(deharshSlider.value));
-  const words = processed.split(" ");
-  let index = 0;
-
-  function speakChunk(){
-    if(index >= words.length) return;
-    const utter = new SpeechSynthesisUtterance(words[index]);
-    utter.pitch = parseFloat(pitchSlider.value);
-
-    let rate = parseFloat(speedSlider.value) -
-               (parseFloat(stretchSlider.value) * 0.8);
-    if(rate < 0.1) rate = 0.1;
-
-    utter.rate = rate;
-    utter.onend = function(){
-      index++;
-      speakChunk();
-    };
-    speechSynthesis.speak(utter);
-  }
-
-  speakChunk();
-}
-
-listenBtn.addEventListener("click", () => {
-  const text = input.value.trim();
-  if (!text) return;
-  playFrozen(text);
-});
-
-saveBtn.addEventListener("click", () => {
-  const text = input.value.trim();
-  if (!text) return;
-
-  const preset = {
-    text,
-    pitch: pitchSlider.value,
-    speed: speedSlider.value,
-    stretch: stretchSlider.value,
-    deharsh: deharshSlider.value
-  };
-
-  presets.push(preset);
-  renderPresets();
-});
-
-function renderPresets() {
-  presetList.innerHTML = "";
-  presets.forEach((preset) => {
-    const div = document.createElement("div");
-    div.className = "presetItem";
-    div.textContent = preset.text;
-
-    div.addEventListener("click", () => {
-      input.value = preset.text;
-      pitchSlider.value = preset.pitch;
-      speedSlider.value = preset.speed;
-      stretchSlider.value = preset.stretch;
-      deharshSlider.value = preset.deharsh;
-      sliders.forEach(s => updateFill(s));
-    });
-
-    presetList.appendChild(div);
-  });
-}
 </script>
 
 </body>
