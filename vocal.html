@@ -37,17 +37,16 @@ body {
 /* Row layout */
 .rowWrap{
   display: flex;
-  align-items: center;     /* vertical centering */
-  gap: 15px;               /* closer to sliders */
+  align-items: center;
+  gap: 15px;
   margin-top: 40px;
 }
-
 
 /* ===== SLIDERS (UNCHANGED LOGIC) ===== */
 .sliderWrap {
   display: flex;
   flex-direction: column;
-  gap: 14px;               /* rhythm reference */
+  gap: 14px;
   font-size: 10px;
   letter-spacing: 2px;
   align-items: flex-start;
@@ -97,17 +96,17 @@ input[type=range]::-moz-range-thumb {
   border: none;
 }
 
-/* ===== BUTTON COLUMN ===== */
+/* ===== BUTTON COLUMN (FIXED EVEN DISTRIBUTION) ===== */
 .buttonCol{
   display: flex;
   flex-direction: column;
-  gap: 5px;          /* exact match to sliderWrap */
-  justify-content: center;
+  justify-content: space-between;  /* evenly spread buttons */
+  height: 168px;                   /* match slider column height */
 }
 
-/* Slightly larger balanced buttons */
+/* Buttons */
 .toolBlock {
-  width: 55px;        /* fills space better */
+  width: 55px;
   height: 38px;
   background: transparent;
   border: 1px solid rgba(255,255,255,0.55);
