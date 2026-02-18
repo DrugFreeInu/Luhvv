@@ -69,7 +69,6 @@ body {
   transition: transform 0.2s ease;
 }
 
-/* rotate when open */
 .topBar.open .arrow{
   transform: rotate(-135deg);
 }
@@ -249,9 +248,15 @@ const sliders = document.querySelectorAll("input[type=range]");
 const dropdown = document.getElementById("vocalDropdown");
 const toggle = document.getElementById("vocalToggle");
 const saveBtn = document.getElementById("saveBtn");
+const listenBtn = document.getElementById("listenBtn");
 const input = document.getElementById("inputField");
 
-/* Slider fill logic untouched */
+const pitchSlider = document.getElementById("pitchSlider");
+const speedSlider = document.getElementById("speedSlider");
+const stretchSlider = document.getElementById("stretchSlider");
+const deharshSlider = document.getElementById("deharshSlider");
+
+/* ===== SLIDER FILL ===== */
 function updateFill(slider) {
   const min = parseFloat(slider.min);
   const max = parseFloat(slider.max);
@@ -266,14 +271,60 @@ sliders.forEach(slider => {
   slider.addEventListener("input", () => updateFill(slider));
 });
 
-/* Dropdown toggle */
+/* ===== AUDIO ===== */
+function softenText(text, amount){
+  if(amount === 0) return text;
+  return text
+    .replace(/p/gi,"b")
+    .replace(/t/gi,"d")
+    .replace(/k/gi,"g")
+    .replace(/s/gi,"z");
+}
+
+function playFrozen(text) {
+  speechSynthesis.cancel();
+
+  let processed = softenText(text, parseFloat(deharshSlider.value));
+  const words = processed.split(" ");
+  let index = 0;
+
+  function speakChunk(){
+    if(index >= words.length) return;
+
+    const utter = new SpeechSynthesisUtterance(words[index]);
+    utter.pitch = parseFloat(pitchSlider.value);
+
+    let rate = parseFloat(speedSlider.value) -
+               (parseFloat(stretchSlider.value) * 0.8);
+    if(rate < 0.1) rate = 0.1;
+
+    utter.rate = rate;
+
+    utter.onend = function(){
+      index++;
+      speakChunk();
+    };
+
+    speechSynthesis.speak(utter);
+  }
+
+  speakChunk();
+}
+
+listenBtn.addEventListener("click", () => {
+  const text = input.value.trim();
+  if (!text) return;
+  playFrozen(text);
+});
+
+/* ===== DROPDOWN ===== */
 toggle.addEventListener("click", () => {
   const isOpen = dropdown.style.display === "flex";
   dropdown.style.display = isOpen ? "none" : "flex";
   toggle.classList.toggle("open", !isOpen);
 });
 
-/* Save into dropdown */
+/* ===== SAVE INTO DROPDOWN ===== */
 saveBtn.addEventListener("click", () => {
   const text = input.value.trim();
   if(!text) return;
