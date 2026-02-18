@@ -15,7 +15,6 @@ html, body {
   overflow: hidden;
 }
 
-/* Layout */
 body {
   display: flex;
   justify-content: flex-start;
@@ -34,12 +33,16 @@ body {
   align-items: flex-start;
 }
 
-/* ===== TOP BAR ===== */
-.topBar{
+/* ===== TOP BAR (BOXED) ===== */
+.topWrapper{
+  position: relative;
   width: 205px;
-  height: 22px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.25);
+}
+
+.topBar{
+  width: 100%;
+  height: 25px;
+  border: 1px solid rgba(255,255,255,0.35);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -52,6 +55,7 @@ body {
 
 .topBar span {
   transform: skewX(6deg);
+  color: white;
 }
 
 .arrow{
@@ -63,21 +67,43 @@ body {
   transform: rotate(45deg);
 }
 
+/* ===== DROPDOWN ===== */
+.dropdown {
+  position: absolute;
+  top: 38px;
+  width: 100%;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(0,0,0,0.6);
+  display: none;
+  flex-direction: column;
+}
+
+.dropdownItem{
+  padding: 6px 10px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+
+.dropdownItem:hover{
+  background: rgba(255,255,255,0.1);
+}
+
 /* Row layout */
 .rowWrap{
   display: flex;
   align-items: center;
   gap: 15px;
+  margin-top: 25px;
 }
 
-/* ===== SLIDERS (UNCHANGED) ===== */
+/* ===== SLIDERS (UNTOUCHED) ===== */
 .sliderWrap {
   display: flex;
   flex-direction: column;
   gap: 14px;
   font-size: 10px;
   letter-spacing: 2px;
-  align-items: flex-start;
 }
 
 .sliderGroup {
@@ -120,7 +146,7 @@ input[type=range]::-webkit-slider-thumb {
   height: 120px;
 }
 
-/* Base Button Shape (italicized shape) */
+/* Button shape */
 .toolBlock {
   width: 60px;
   height: 33px;
@@ -129,24 +155,32 @@ input[type=range]::-webkit-slider-thumb {
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: skewX(-12deg);   /* shape tilt */
+  transform: skewX(-12deg);
   box-sizing: border-box;
+  color: white;
 }
 
-/* Text inside corrected */
+/* Inner text correction */
 .toolBlock span {
-  transform: skewX(12deg);   /* unskew text */
+  transform: skewX(12deg);
   font-size: 11px;
   letter-spacing: 2px;
+  color: white;
 }
 
-/* TYPE input styled same shape */
+/* TYPE input */
 #inputField {
   text-align: center;
   border: 1px solid rgba(255,255,255,0.35);
+  color: white;
 }
 
-/* TEST button slanted opposite */
+#inputField::placeholder{
+  color: white;
+  opacity: 0.6;
+}
+
+/* TEST opposite tilt */
 #listenBtn {
   transform: skewX(12deg);
 }
@@ -161,9 +195,15 @@ input[type=range]::-webkit-slider-thumb {
 
 <div class="container">
 
-  <div class="topBar">
-    <span>VOCALS</span>
-    <div class="arrow"></div>
+  <div class="topWrapper">
+    <div class="topBar" id="vocalToggle">
+      <span>VOCALS</span>
+      <div class="arrow"></div>
+    </div>
+
+    <div class="dropdown" id="vocalDropdown">
+      <!-- saved vocals appear here -->
+    </div>
   </div>
 
   <div class="rowWrap">
@@ -204,6 +244,12 @@ input[type=range]::-webkit-slider-thumb {
 
 <script>
 const sliders = document.querySelectorAll("input[type=range]");
+const dropdown = document.getElementById("vocalDropdown");
+const toggle = document.getElementById("vocalToggle");
+const saveBtn = document.getElementById("saveBtn");
+const input = document.getElementById("inputField");
+
+let presets = [];
 
 function updateFill(slider) {
   const min = parseFloat(slider.min);
@@ -218,6 +264,29 @@ function updateFill(slider) {
 sliders.forEach(slider => {
   updateFill(slider);
   slider.addEventListener("input", () => updateFill(slider));
+});
+
+/* Dropdown toggle */
+toggle.addEventListener("click", () => {
+  dropdown.style.display =
+    dropdown.style.display === "flex" ? "none" : "flex";
+});
+
+/* Save into dropdown */
+saveBtn.addEventListener("click", () => {
+  const text = input.value.trim();
+  if(!text) return;
+
+  const preset = document.createElement("div");
+  preset.className = "dropdownItem";
+  preset.textContent = text;
+
+  preset.addEventListener("click", () => {
+    input.value = text;
+    dropdown.style.display = "none";
+  });
+
+  dropdown.appendChild(preset);
 });
 </script>
 
