@@ -31,14 +31,15 @@ html, body {
   pointer-events: none;
 }
 
-/* Top vocal section */
+/* === Top vocal section (CROPPED PROPERLY) === */
 #vocal {
-  width: 100%;
-  height: 40vh;          /* keep your intent */
+  width: 360px;           /* match vocal.html container */
+  height: 40vh;
   border: none;
   z-index: 10;
-  background: green;     /* debug */
+  background: green;      /* debug stays */
   display: block;
+  margin-left: 40px;      /* spacing from left */
 }
 
 /* Lower main area */
@@ -103,8 +104,7 @@ html, body {
 </div>
 
 <script>
-/* === FORCE FRESH LOAD === */
-const version = Date.now(); // unique per page load
+const version = Date.now();
 
 document.getElementById("beams").src = "beams.html?v=" + version;
 document.getElementById("vocal").src = "vocal.html?v=" + version;
@@ -121,14 +121,12 @@ const bellFrame = document.getElementById("bell");
 
 let currentPanel = null;
 
-/* === iOS SAFE HEIGHT CLAMP (THE FIX) ===
-   Locks app + vocal to real pixel viewport so iframe layout stops auto-scaling.
-*/
+/* iOS safe height clamp */
 function clampHeights(){
   const H = window.innerHeight || document.documentElement.clientHeight;
   app.style.height = H + "px";
 
-  const vocalH = Math.round(H * 0.40);  // your 40vh intent
+  const vocalH = Math.round(H * 0.40);
   vocalIframe.style.height = vocalH + "px";
   lowerSection.style.height = (H - vocalH) + "px";
 }
@@ -137,10 +135,9 @@ clampHeights();
 window.addEventListener("resize", clampHeights);
 window.addEventListener("orientationchange", () => setTimeout(clampHeights, 50));
 
-/* Only load panel if different */
 function togglePanel(src){
   if (currentPanel !== src) {
-    sliderPanel.src = src + "?v=" + version; // also fresh
+    sliderPanel.src = src + "?v=" + version;
     currentPanel = src;
   }
   sliderPanel.style.display = "block";
