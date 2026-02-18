@@ -37,25 +37,25 @@ body {
 /* Sliders + Buttons row */
 .rowWrap{
   display: flex;
-  align-items: center;
-  gap: 28px;
+  align-items: flex-start; /* aligned top */
+  gap: 32px;
   margin-left: 10px;
 }
 
-/* Button column */
+/* Button column aligned with sliders */
 .buttonCol{
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  justify-content: center;
+  gap: 18px; /* matches slider vertical rhythm */
+  margin-top: 18px; /* aligns TYPE with first slider */
 }
 
-/* Tighter buttons */
+/* Buttons */
 .toolBlock {
   width: auto;
-  min-width: 72px;
-  height: 34px;
-  padding: 0 14px;
+  min-width: 80px;
+  height: 36px;
+  padding: 0 16px;
   background: transparent;
   border: 1px solid rgba(255,255,255,0.55);
   color: white;
@@ -77,7 +77,7 @@ body {
   letter-spacing: 1px;
 }
 
-/* Buttons */
+/* Hover */
 button.toolBlock {
   cursor: pointer;
   transition: opacity 0.15s ease, border-color 0.15s ease;
@@ -88,7 +88,7 @@ button.toolBlock:hover {
   border-color: rgba(255,255,255,0.8);
 }
 
-/* ===== SLIDERS ===== */
+/* ===== SLIDERS (UNCHANGED) ===== */
 .sliderWrap {
   display: flex;
   flex-direction: column;
@@ -102,7 +102,7 @@ button.toolBlock:hover {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  width: 150px;   /* ← restored larger size */
+  width: 260px;
   box-sizing: border-box;
 }
 
@@ -199,8 +199,6 @@ input[type=range]::-moz-range-thumb {
       <input id="inputField" class="toolBlock" type="text" placeholder="TYPE">
       <button id="listenBtn" class="toolBlock">TEST</button>
       <button id="saveBtn" class="toolBlock">SAVE</button>
-      <button id="undoBtn" class="toolBlock">UNDO</button>
-      <button id="redoBtn" class="toolBlock">REDO</button>
     </div>
 
   </div>
@@ -213,8 +211,6 @@ input[type=range]::-moz-range-thumb {
 const input = document.getElementById("inputField");
 const listenBtn = document.getElementById("listenBtn");
 const saveBtn = document.getElementById("saveBtn");
-const undoBtn = document.getElementById("undoBtn");
-const redoBtn = document.getElementById("redoBtn");
 
 const pitchSlider = document.getElementById("pitchSlider");
 const speedSlider = document.getElementById("speedSlider");
@@ -225,36 +221,6 @@ const sliders = document.querySelectorAll("input[type=range]");
 const presetList = document.getElementById("presetList");
 
 let presets = [];
-
-/* UNDO / REDO */
-let history = [];
-let historyIndex = -1;
-
-function saveHistory(value){
-  if(historyIndex < history.length - 1){
-    history = history.slice(0, historyIndex + 1);
-  }
-  history.push(value);
-  historyIndex++;
-}
-
-input.addEventListener("input", () => {
-  saveHistory(input.value);
-});
-
-undoBtn.addEventListener("click", () => {
-  if(historyIndex > 0){
-    historyIndex--;
-    input.value = history[historyIndex];
-  }
-});
-
-redoBtn.addEventListener("click", () => {
-  if(historyIndex < history.length - 1){
-    historyIndex++;
-    input.value = history[historyIndex];
-  }
-});
 
 /* Slider Fill */
 function updateFill(slider) {
