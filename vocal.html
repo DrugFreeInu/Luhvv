@@ -15,6 +15,7 @@ html, body {
   overflow: hidden;
 }
 
+/* Layout */
 body {
   display: flex;
   justify-content: flex-start;
@@ -27,23 +28,33 @@ body {
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 10px;
+  justify-content: center;
+  gap: 14px;
   padding: 20px;
   box-sizing: border-box;
+  align-items: flex-start;
 }
 
-/* Buttons / Input */
+/* 2x2 Control Grid */
+.controlGrid {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 10px 14px;
+  margin-left: 10px;
+}
+
+/* Shared size */
 .toolBlock {
-  width: 140px;
+  width: 70%;
+  max-width: 90px;
   box-sizing: border-box;
-  height: 38px;
+  height: 36px;
   background: transparent;
   border: 1px solid rgba(255,255,255,0.55);
   color: white;
   font-size: 12px;
   letter-spacing: 2px;
-  padding: 0 10px;
+  padding: 0 8px;
   outline: none;
   display: flex;
   align-items: center;
@@ -51,11 +62,15 @@ body {
   text-transform: uppercase;
 }
 
-.longButton {
-  width: 100%;
-  max-width: 240px;
+/* TYPE input styling */
+#inputField {
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.35);
+  text-transform: none; /* allow normal typing */
+  letter-spacing: 1px;
 }
 
+/* Buttons */
 button.toolBlock {
   cursor: pointer;
   transition: opacity 0.15s ease, border-color 0.15s ease;
@@ -66,53 +81,25 @@ button.toolBlock:hover {
   border-color: rgba(255,255,255,0.8);
 }
 
-#inputField {
-  text-align: left;
-  border: 1px solid rgba(255,255,255,0.25);
-}
-
-/* Two column button row */
-.buttonRow {
-  display: flex;
-  gap: 10px;
-}
-
-/* Dropdown */
-#presetDropdown {
-  display: none;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 4px;
-  max-width: 240px;
-}
-
-.presetItem {
-  padding: 6px 8px;
-  border: 1px solid rgba(255,255,255,0.25);
-  font-size: 11px;
-  cursor: pointer;
-  opacity: 0.8;
-}
-
-.presetItem:hover {
-  opacity: 1;
-}
-
 /* Sliders */
 .sliderWrap {
-  margin-top: 20px;
+  margin-top: 6px;
   display: flex;
   flex-direction: column;
   gap: 14px;
   font-size: 10px;
   letter-spacing: 2px;
+  align-items: flex-start;
+  margin-left: 10px;
 }
 
 .sliderGroup {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  width: 240px;
+  width: 70%;
+  max-width: 240px;
+  box-sizing: border-box;
 }
 
 .sliderGroup label {
@@ -120,6 +107,7 @@ button.toolBlock:hover {
   font-style: italic;
   transform: skewX(-6deg);
   letter-spacing: 1.5px;
+  line-height: 1;
   margin: 0;
 }
 
@@ -149,6 +137,27 @@ input[type=range]::-moz-range-thumb {
   background: transparent;
   border: none;
 }
+
+/* Presets */
+#presetList {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-left: 10px;
+}
+
+.presetItem {
+  padding: 6px 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  font-size: 11px;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.presetItem:hover {
+  opacity: 1;
+}
 </style>
 </head>
 
@@ -156,20 +165,13 @@ input[type=range]::-moz-range-thumb {
 
 <div class="container">
 
-  <!-- VOCALS DROPDOWN BUTTON -->
-  <button id="vocalsBtn" class="toolBlock longButton">VOCALS</button>
-
-  <div id="presetDropdown"></div>
-
-  <!-- TYPE / TEST / SAVE -->
-  <input id="inputField" class="toolBlock" type="text" placeholder="TYPE" />
-
-  <div class="buttonRow">
+  <div class="controlGrid">
+    <input id="inputField" class="toolBlock" type="text" placeholder="TYPE">
     <button id="listenBtn" class="toolBlock">TEST</button>
+    <button id="menuBtn" class="toolBlock">MENU</button>
     <button id="saveBtn" class="toolBlock">SAVE</button>
   </div>
 
-  <!-- SLIDERS -->
   <div class="sliderWrap">
 
     <div class="sliderGroup">
@@ -194,14 +196,14 @@ input[type=range]::-moz-range-thumb {
 
   </div>
 
+  <div id="presetList"></div>
+
 </div>
 
 <script>
 const input = document.getElementById("inputField");
 const listenBtn = document.getElementById("listenBtn");
 const saveBtn = document.getElementById("saveBtn");
-const vocalsBtn = document.getElementById("vocalsBtn");
-const presetDropdown = document.getElementById("presetDropdown");
 
 const pitchSlider = document.getElementById("pitchSlider");
 const speedSlider = document.getElementById("speedSlider");
@@ -209,17 +211,18 @@ const stretchSlider = document.getElementById("stretchSlider");
 const deharshSlider = document.getElementById("deharshSlider");
 
 const sliders = document.querySelectorAll("input[type=range]");
+const presetList = document.getElementById("presetList");
 
 let presets = [];
 
-/* Slider fill */
 function updateFill(slider) {
   const min = parseFloat(slider.min);
   const max = parseFloat(slider.max);
   const value = parseFloat(slider.value);
   const percent = ((value - min) / (max - min)) * 100;
+
   slider.style.background =
-    `linear-gradient(to right, #FFD84D ${percent}%, #000 ${percent}%)`;
+    `linear-gradient(to right,#FFD84D ${percent}%,#000 ${percent}%)`;
 }
 
 sliders.forEach(slider => {
@@ -227,20 +230,37 @@ sliders.forEach(slider => {
   slider.addEventListener("input", () => updateFill(slider));
 });
 
-/* Voice Logic */
+function softenText(text, amount){
+  if(amount === 0) return text;
+  return text.replace(/p/gi,"b")
+             .replace(/t/gi,"d")
+             .replace(/k/gi,"g")
+             .replace(/s/gi,"z");
+}
+
 function playFrozen(text) {
   speechSynthesis.cancel();
-  const words = text.split(" ");
+
+  let processed = softenText(text, parseFloat(deharshSlider.value));
+  const words = processed.split(" ");
   let index = 0;
 
   function speakChunk(){
     if(index >= words.length) return;
+
     const utter = new SpeechSynthesisUtterance(words[index]);
     utter.pitch = parseFloat(pitchSlider.value);
+
     let rate = parseFloat(speedSlider.value) - (parseFloat(stretchSlider.value) * 0.8);
     if(rate < 0.1) rate = 0.1;
+
     utter.rate = rate;
-    utter.onend = () => { index++; speakChunk(); };
+
+    utter.onend = function(){
+      index++;
+      speakChunk();
+    };
+
     speechSynthesis.speak(utter);
   }
 
@@ -253,44 +273,40 @@ listenBtn.addEventListener("click", () => {
   playFrozen(text);
 });
 
-/* Save */
 saveBtn.addEventListener("click", () => {
   const text = input.value.trim();
   if (!text) return;
 
-  presets.push({
+  const preset = {
     text,
     pitch: pitchSlider.value,
     speed: speedSlider.value,
     stretch: stretchSlider.value,
     deharsh: deharshSlider.value
-  });
+  };
 
+  presets.push(preset);
   renderPresets();
 });
 
-/* Dropdown Toggle */
-vocalsBtn.addEventListener("click", () => {
-  presetDropdown.style.display =
-    presetDropdown.style.display === "flex" ? "none" : "flex";
-});
-
-/* Render */
 function renderPresets() {
-  presetDropdown.innerHTML = "";
-  presets.forEach(preset => {
+  presetList.innerHTML = "";
+
+  presets.forEach((preset) => {
     const div = document.createElement("div");
     div.className = "presetItem";
     div.textContent = preset.text;
-    div.onclick = () => {
+
+    div.addEventListener("click", () => {
       input.value = preset.text;
       pitchSlider.value = preset.pitch;
       speedSlider.value = preset.speed;
       stretchSlider.value = preset.stretch;
       deharshSlider.value = preset.deharsh;
-      sliders.forEach(updateFill);
-    };
-    presetDropdown.appendChild(div);
+      sliders.forEach(s => updateFill(s));
+    });
+
+    presetList.appendChild(div);
   });
 }
 </script>
