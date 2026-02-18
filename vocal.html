@@ -34,58 +34,12 @@ body {
   align-items: flex-start;
 }
 
-/* Sliders + Buttons row */
+/* Row layout */
 .rowWrap{
   display: flex;
-  align-items: flex-start; /* aligned top */
-  gap: 32px;
+  align-items: flex-start;
+  gap: 34px;
   margin-left: 10px;
-}
-
-/* Button column aligned with sliders */
-.buttonCol{
-  display: flex;
-  flex-direction: column;
-  gap: 18px; /* matches slider vertical rhythm */
-  margin-top: 18px; /* aligns TYPE with first slider */
-}
-
-/* Buttons */
-.toolBlock {
-  width: auto;
-  min-width: 10px;
-  height: 36px;
-  padding: 0px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.55);
-  color: white;
-  font-size: 12px;
-  letter-spacing: 2px;
-  outline: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-transform: uppercase;
-  box-sizing: border-box;
-}
-
-/* TYPE input */
-#inputField {
-  text-align: center;
-  border: 1px solid rgba(255,255,255,0.35);
-  text-transform: none;
-  letter-spacing: 1px;
-}
-
-/* Hover */
-button.toolBlock {
-  cursor: pointer;
-  transition: opacity 0.15s ease, border-color 0.15s ease;
-}
-
-button.toolBlock:hover {
-  opacity: 0.85;
-  border-color: rgba(255,255,255,0.8);
 }
 
 /* ===== SLIDERS (UNCHANGED) ===== */
@@ -140,6 +94,51 @@ input[type=range]::-moz-range-thumb {
   height: 18px;
   background: transparent;
   border: none;
+}
+
+/* ===== BUTTON COLUMN ===== */
+.buttonCol{
+  display: flex;
+  flex-direction: column;
+  gap: 18px;   /* matches slider rhythm */
+  margin-top: 18px; /* aligns TYPE with first slider */
+}
+
+/* Smaller clean buttons */
+.toolBlock {
+  width: 60px;           /* fixed small width */
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.55);
+  color: white;
+  font-size: 11px;
+  letter-spacing: 2px;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  box-sizing: border-box;
+}
+
+/* TYPE input */
+#inputField {
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.35);
+  text-transform: none;
+  letter-spacing: 1px;
+}
+
+/* Hover */
+button.toolBlock {
+  cursor: pointer;
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+
+button.toolBlock:hover {
+  opacity: 0.85;
+  border-color: rgba(255,255,255,0.8);
 }
 
 /* Presets */
@@ -222,7 +221,6 @@ const presetList = document.getElementById("presetList");
 
 let presets = [];
 
-/* Slider Fill */
 function updateFill(slider) {
   const min = parseFloat(slider.min);
   const max = parseFloat(slider.max);
@@ -237,7 +235,6 @@ sliders.forEach(slider => {
   slider.addEventListener("input", () => updateFill(slider));
 });
 
-/* Audio */
 function softenText(text, amount){
   if(amount === 0) return text;
   return text.replace(/p/gi,"b")
