@@ -18,7 +18,7 @@ html, body {
 /* Layout */
 body {
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-start;   /* left aligned */
   align-items: center;
 }
 
@@ -30,22 +30,23 @@ body {
   flex-direction: column;
   justify-content: center;
   gap: 14px;
-  padding: 20px 20px 20px 0px;
+  padding: 20px;
   box-sizing: border-box;
-  align-items: flex-start;
+  align-items: flex-start;       /* left aligned */
 }
 
-/* === CONTROL GRID === */
+/* Button Grid */
 .controlGrid {
   display: grid;
   grid-template-columns: repeat(2, auto);
-  gap: 8px 12px;
+  gap: 10px 14px;
+  margin-left: 10px;             /* small wall offset */
 }
 
-/* Buttons / Input */
+/* Buttons */
 .toolBlock {
   width: 70%;
-  max-width: 60px;
+  max-width: 90px;               /* widened from 60 */
   box-sizing: border-box;
   height: 36px;
   background: transparent;
@@ -59,11 +60,6 @@ body {
   align-items: center;
   justify-content: center;
   text-transform: uppercase;
-}
-
-#inputField {
-  text-align: center;
-  border: 1px solid rgba(255,255,255,0.25);
 }
 
 button.toolBlock {
@@ -85,6 +81,7 @@ button.toolBlock:hover {
   font-size: 10px;
   letter-spacing: 2px;
   align-items: flex-start;
+  margin-left: 10px;
 }
 
 .sliderGroup {
@@ -117,6 +114,11 @@ input[type=range] {
   margin: 0;
 }
 
+input[type=range]::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 4px;
+}
+
 input[type=range]::-webkit-slider-thumb {
   appearance: none;
   width: 18px;
@@ -139,6 +141,7 @@ input[type=range]::-moz-range-thumb {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  margin-left: 10px;
 }
 
 .presetItem {
@@ -159,9 +162,8 @@ input[type=range]::-moz-range-thumb {
 
 <div class="container">
 
-  <!-- NEW GRID -->
   <div class="controlGrid">
-    <input id="inputField" class="toolBlock" type="text" placeholder="TYPE">
+    <button id="typeBtn" class="toolBlock">TYPE</button>
     <button id="listenBtn" class="toolBlock">TEST</button>
     <button id="editBtn" class="toolBlock">EDIT</button>
     <button id="saveBtn" class="toolBlock">SAVE</button>
@@ -196,10 +198,8 @@ input[type=range]::-moz-range-thumb {
 </div>
 
 <script>
-const input = document.getElementById("inputField");
 const listenBtn = document.getElementById("listenBtn");
 const saveBtn = document.getElementById("saveBtn");
-const editBtn = document.getElementById("editBtn");
 
 const pitchSlider = document.getElementById("pitchSlider");
 const speedSlider = document.getElementById("speedSlider");
@@ -210,7 +210,9 @@ const sliders = document.querySelectorAll("input[type=range]");
 const presetList = document.getElementById("presetList");
 
 let presets = [];
+let currentText = "";
 
+/* Slider fill */
 function updateFill(slider) {
   const min = parseFloat(slider.min);
   const max = parseFloat(slider.max);
@@ -218,7 +220,9 @@ function updateFill(slider) {
   const percent = ((value - min) / (max - min)) * 100;
 
   slider.style.background =
-    `linear-gradient(to right,#FFD84D ${percent}%,#000 ${percent}%)`;
+    `linear-gradient(to right,
+      #FFD84D ${percent}%,
+      #000 ${percent}%)`;
 }
 
 sliders.forEach(slider => {
@@ -226,6 +230,7 @@ sliders.forEach(slider => {
   slider.addEventListener("input", () => updateFill(slider));
 });
 
+/* Speech */
 function softenText(text, amount){
   if(amount === 0) return text;
   return text.replace(/p/gi,"b")
@@ -236,6 +241,7 @@ function softenText(text, amount){
 
 function playFrozen(text) {
   speechSynthesis.cancel();
+
   let processed = softenText(text, parseFloat(deharshSlider.value));
   const words = processed.split(" ");
   let index = 0;
@@ -248,6 +254,7 @@ function playFrozen(text) {
 
     let rate = parseFloat(speedSlider.value) - (parseFloat(stretchSlider.value) * 0.8);
     if(rate < 0.1) rate = 0.1;
+
     utter.rate = rate;
 
     utter.onend = function(){
@@ -262,17 +269,15 @@ function playFrozen(text) {
 }
 
 listenBtn.addEventListener("click", () => {
-  const text = input.value.trim();
-  if (!text) return;
-  playFrozen(text);
+  if (!currentText) return;
+  playFrozen(currentText);
 });
 
 saveBtn.addEventListener("click", () => {
-  const text = input.value.trim();
-  if (!text) return;
+  if (!currentText) return;
 
   const preset = {
-    text,
+    text: currentText,
     pitch: pitchSlider.value,
     speed: speedSlider.value,
     stretch: stretchSlider.value,
@@ -283,25 +288,23 @@ saveBtn.addEventListener("click", () => {
   renderPresets();
 });
 
-/* EDIT just focuses the input */
-editBtn.addEventListener("click", () => {
-  input.focus();
-});
-
 function renderPresets() {
   presetList.innerHTML = "";
+
   presets.forEach((preset) => {
     const div = document.createElement("div");
     div.className = "presetItem";
     div.textContent = preset.text;
+
     div.addEventListener("click", () => {
-      input.value = preset.text;
+      currentText = preset.text;
       pitchSlider.value = preset.pitch;
       speedSlider.value = preset.speed;
       stretchSlider.value = preset.stretch;
       deharshSlider.value = preset.deharsh;
       sliders.forEach(s => updateFill(s));
     });
+
     presetList.appendChild(div);
   });
 }
