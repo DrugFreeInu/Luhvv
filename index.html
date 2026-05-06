@@ -11,48 +11,48 @@ html, body {
   height: 100%;
   background: #000;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  overflow-x: hidden;
-}
-
-#app {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  width: 100vw;
-  position: relative;
   overflow: hidden;
 }
 
-/* Background beams */
+#app {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #000;
+}
+
+/* Background beams — full screen behind everything */
 #beams {
-  position: absolute;
+  position: fixed;
   inset: 0;
+  width: 100vw;
+  height: 100vh;
   border: none;
   z-index: 0;
   pointer-events: none;
+  background: #000;
 }
 
-/* === Top vocal section === */
+/* Top vocal section */
 #vocal {
+  position: relative;
   width: 360px;
   height: 40vh;
   border: none;
   z-index: 10;
-
   background: transparent;
-
   display: block;
   margin-left: 40px;
-
-  /* slight transparency so beams glow through */
   opacity: 0.96;
 }
 
 /* Lower main area */
 #lowerSection {
-  flex: 1;
   position: relative;
+  height: 60vh;
   z-index: 10;
+  background: transparent;
 }
 
 /* Floating slider panel */
@@ -61,7 +61,7 @@ html, body {
   left: 40px;
   top: 120px;
   width: 280px;
-  height: auto;
+  height: 260px;
   border: none;
   background: transparent;
   display: none;
@@ -94,7 +94,10 @@ html, body {
 
 <div id="app">
 
-  <iframe id="beams"></iframe>
+  <iframe
+    id="beams"
+    src="beams.html">
+  </iframe>
 
   <iframe
     id="vocal"
@@ -103,7 +106,10 @@ html, body {
 
   <div id="lowerSection">
 
-    <iframe id="sliderPanel"></iframe>
+    <iframe
+      id="sliderPanel"
+      allowtransparency="true">
+    </iframe>
 
     <div id="engineRail">
       <iframe id="wub" allowtransparency="true"></iframe>
@@ -149,11 +155,10 @@ function clampHeights(){
   app.style.height = H + "px";
 
   const vocalH = Math.round(H * 0.40);
+  const lowerH = H - vocalH;
 
   vocalIframe.style.height = vocalH + "px";
-
-  lowerSection.style.height =
-    (H - vocalH) + "px";
+  lowerSection.style.height = lowerH + "px";
 }
 
 clampHeights();
@@ -162,7 +167,7 @@ window.addEventListener("resize", clampHeights);
 
 window.addEventListener(
   "orientationchange",
-  () => setTimeout(clampHeights, 50)
+  () => setTimeout(clampHeights, 80)
 );
 
 function togglePanel(src){
