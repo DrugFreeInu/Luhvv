@@ -22,7 +22,6 @@ html, body {
   background: #000;
 }
 
-/* Background beams — full screen behind everything */
 #beams {
   position: fixed;
   inset: 0;
@@ -34,7 +33,6 @@ html, body {
   background: #000;
 }
 
-/* Top vocal section */
 #vocal {
   position: relative;
   width: 360px;
@@ -47,7 +45,6 @@ html, body {
   opacity: 0.96;
 }
 
-/* Lower main area */
 #lowerSection {
   position: relative;
   height: 60vh;
@@ -55,34 +52,34 @@ html, body {
   background: transparent;
 }
 
-/* Floating slider panel */
+/* sliders LEFT */
 #sliderPanel {
   position: absolute;
-  left: 40px;
-  top: 120px;
-  width: 280px;
-  height: 260px;
+  left: 28px;
+  top: 130px;
+  width: 270px;
+  height: 280px;
   border: none;
   background: transparent;
   display: none;
   z-index: 20;
 }
 
-/* Engine rail */
+/* buttons RIGHT */
 #engineRail {
   position: absolute;
-  right: 80px;
-  top: 140px;
+  right: 42px;
+  top: 130px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   align-items: flex-end;
   z-index: 30;
 }
 
 #wub,
 #bell {
-  width: 200px;
+  width: 210px;
   height: 110px;
   border: none;
   background: transparent;
@@ -94,22 +91,13 @@ html, body {
 
 <div id="app">
 
-  <iframe
-    id="beams"
-    src="beams.html">
-  </iframe>
+  <iframe id="beams" src="beams.html"></iframe>
 
-  <iframe
-    id="vocal"
-    allowtransparency="true">
-  </iframe>
+  <iframe id="vocal" allowtransparency="true"></iframe>
 
   <div id="lowerSection">
 
-    <iframe
-      id="sliderPanel"
-      allowtransparency="true">
-    </iframe>
+    <iframe id="sliderPanel" allowtransparency="true"></iframe>
 
     <div id="engineRail">
       <iframe id="wub" allowtransparency="true"></iframe>
@@ -123,17 +111,10 @@ html, body {
 <script>
 const version = Date.now();
 
-document.getElementById("beams").src =
-  "beams.html?v=" + version;
-
-document.getElementById("vocal").src =
-  "vocal.html?v=" + version;
-
-document.getElementById("wub").src =
-  "wub.html?v=" + version;
-
-document.getElementById("bell").src =
-  "bell.html?v=" + version;
+document.getElementById("beams").src = "beams.html?v=" + version;
+document.getElementById("vocal").src = "vocal.html?v=" + version;
+document.getElementById("wub").src = "wub.html?v=" + version;
+document.getElementById("bell").src = "bell.html?v=" + version;
 
 const app = document.getElementById("app");
 const vocalIframe = document.getElementById("vocal");
@@ -145,12 +126,8 @@ const bellFrame = document.getElementById("bell");
 
 let currentPanel = null;
 
-/* iOS safe height clamp */
 function clampHeights(){
-
-  const H =
-    window.innerHeight ||
-    document.documentElement.clientHeight;
+  const H = window.innerHeight || document.documentElement.clientHeight;
 
   app.style.height = H + "px";
 
@@ -171,12 +148,8 @@ window.addEventListener(
 );
 
 function togglePanel(src){
-
   if (currentPanel !== src) {
-
-    sliderPanel.src =
-      src + "?v=" + version;
-
+    sliderPanel.src = src + "?v=" + version;
     currentPanel = src;
   }
 
