@@ -6,50 +6,71 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-html, body {
+html,
+body {
   margin: 0;
+  width: 100%;
+  height: 100%;
   background: transparent;
+  overflow: hidden;
   font-family: system-ui;
-  height: 100vh;
 }
 
 body {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+
   padding-left: 40px;
 }
 
 #controls {
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  width: 260px;
+  gap: 34px;
+
+  width: 170px;
 }
 
+/* smaller slider length */
 input[type=range] {
-  width: 100%;
+  width: 170px;
+
   appearance: none;
+
   height: 4px;
-  background: linear-gradient(to right, #444, #888);
+
+  background:
+    linear-gradient(
+      to right,
+      #444,
+      #888
+    );
+
   border-radius: 2px;
   outline: none;
 }
 
+/* knob */
 input[type=range]::-webkit-slider-thumb {
   appearance: none;
+
   width: 14px;
   height: 14px;
+
   background: white;
   border-radius: 50%;
+
   cursor: pointer;
 }
 
 input[type=range]::-moz-range-thumb {
   width: 14px;
   height: 14px;
+
   background: white;
   border-radius: 50%;
+
   cursor: pointer;
 }
 </style>
@@ -59,23 +80,60 @@ input[type=range]::-moz-range-thumb {
 
 <div id="controls">
 
-  <input type="range" id="freq" min="150" max="1200" value="675">
-  <input type="range" id="ratio" min="0.5" max="6" step="0.1" value="3.25">
-  <input type="range" id="index" min="0" max="500" value="250">
-  <input type="range" id="decay" min="0.2" max="5" step="0.1" value="2.6">
-  <input type="range" id="cutoff" min="2000" max="12000" value="7000">
+  <input
+    type="range"
+    id="freq"
+    min="150"
+    max="1200"
+    value="675">
+
+  <input
+    type="range"
+    id="ratio"
+    min="0.5"
+    max="6"
+    step="0.1"
+    value="3.25">
+
+  <input
+    type="range"
+    id="index"
+    min="0"
+    max="500"
+    value="250">
+
+  <input
+    type="range"
+    id="decay"
+    min="0.2"
+    max="5"
+    step="0.1"
+    value="2.6">
+
+  <input
+    type="range"
+    id="cutoff"
+    min="2000"
+    max="12000"
+    value="7000">
 
 </div>
 
 <script>
-document.querySelectorAll("input").forEach(slider => {
-  slider.addEventListener("input", () => {
-    window.parent.postMessage({
-      type: "bellParam",
-      param: slider.id,
-      value: slider.value
-    }, "*");
-  });
+document
+  .querySelectorAll("input")
+  .forEach(slider => {
+
+    slider.addEventListener("input", () => {
+
+      window.parent.postMessage({
+        type: "bellParam",
+        param: slider.id,
+        value: slider.value
+      }, "*");
+
+    });
+
 });
 </script>
 
