@@ -6,10 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-html, body {
+html,
+body {
   margin: 0;
+  width: 100%;
   height: 100%;
-  background: transparent;
+  background: #000;
   overflow: hidden;
 }
 
@@ -17,73 +19,159 @@ html, body {
 .stage {
   position: fixed;
   inset: 0;
+
+  width: 100vw;
+  height: 100vh;
+
   overflow: hidden;
+  pointer-events: none;
 }
 
+/* Shared beam style */
 .beam {
   position: absolute;
-  width: 200%;
-  height: 200%;
-  top: -100%;
-  left: -50%;
+
+  width: 220vw;
+  height: 220vh;
+
+  top: -110vh;
+  left: -60vw;
+
   transform-origin: top center;
+
   mix-blend-mode: screen;
-  opacity: 0.75;
-  filter: blur(60px) saturate(90%);
+
+  opacity: 0.55;
+
+  filter:
+    blur(70px)
+    saturate(130%);
+
+  will-change:
+    transform,
+    filter;
 }
 
-/* Base beam shapes */
+/* Beam 1 */
 .beam1 {
-  background: conic-gradient(
-    from 180deg at 50% 0%,
-    rgba(160,0,80,0.9) 0deg,
-    rgba(160,0,80,0.5) 6deg,
-    transparent 12deg
-  );
-  animation: sweep1 3s ease-in-out infinite alternate,
-             hueShift 14s linear infinite;
+  background:
+    conic-gradient(
+      from 180deg at 50% 0%,
+      rgba(160,0,80,0.85) 0deg,
+      rgba(160,0,80,0.45) 6deg,
+      transparent 14deg
+    );
+
+  animation:
+    sweep1 4s ease-in-out infinite alternate,
+    hueShift 18s linear infinite;
 }
 
+/* Beam 2 */
 .beam2 {
-  background: conic-gradient(
-    from 180deg at 50% 0%,
-    rgba(0,120,160,0.9) 0deg,
-    rgba(0,120,160,0.5) 6deg,
-    transparent 12deg
-  );
-  animation: sweep2 4s ease-in-out infinite alternate,
-             hueShift 18s linear infinite;
+  background:
+    conic-gradient(
+      from 180deg at 50% 0%,
+      rgba(0,120,160,0.85) 0deg,
+      rgba(0,120,160,0.45) 6deg,
+      transparent 14deg
+    );
+
+  animation:
+    sweep2 5s ease-in-out infinite alternate,
+    hueShift 22s linear infinite;
 }
 
+/* Beam 3 */
 .beam3 {
-  background: conic-gradient(
-    from 180deg at 50% 0%,
-    rgba(150,110,0,0.9) 0deg,
-    rgba(150,110,0,0.5) 6deg,
-    transparent 12deg
-  );
-  animation: sweep3 5s ease-in-out infinite alternate,
-             hueShift 22s linear infinite;
+  background:
+    conic-gradient(
+      from 180deg at 50% 0%,
+      rgba(150,110,0,0.8) 0deg,
+      rgba(150,110,0,0.4) 6deg,
+      transparent 14deg
+    );
+
+  animation:
+    sweep3 6s ease-in-out infinite alternate,
+    hueShift 26s linear infinite;
 }
+
+/* subtle ambient glow */
+.stage::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(255,255,255,0.025),
+      transparent 65%
+    );
+
+  pointer-events: none;
+}
+
+/* Animations */
 
 @keyframes sweep1 {
-  0%   { transform: rotate(-45deg) translateY(0%); }
-  100% { transform: rotate(45deg) translateY(20%); }
+  0% {
+    transform:
+      rotate(-45deg)
+      translateY(0%);
+  }
+
+  100% {
+    transform:
+      rotate(45deg)
+      translateY(18%);
+  }
 }
 
 @keyframes sweep2 {
-  0%   { transform: rotate(35deg) translateY(-10%); }
-  100% { transform: rotate(-50deg) translateY(15%); }
+  0% {
+    transform:
+      rotate(35deg)
+      translateY(-10%);
+  }
+
+  100% {
+    transform:
+      rotate(-50deg)
+      translateY(14%);
+  }
 }
 
 @keyframes sweep3 {
-  0%   { transform: rotate(-60deg) translateY(10%); }
-  100% { transform: rotate(40deg) translateY(-15%); }
+  0% {
+    transform:
+      rotate(-60deg)
+      translateY(10%);
+  }
+
+  100% {
+    transform:
+      rotate(40deg)
+      translateY(-14%);
+  }
 }
 
 @keyframes hueShift {
-  0%   { filter: blur(60px) saturate(90%) hue-rotate(0deg); }
-  100% { filter: blur(60px) saturate(90%) hue-rotate(360deg); }
+  0% {
+    filter:
+      blur(70px)
+      saturate(130%)
+      hue-rotate(0deg);
+  }
+
+  100% {
+    filter:
+      blur(70px)
+      saturate(130%)
+      hue-rotate(360deg);
+  }
 }
 </style>
 </head>
