@@ -20,6 +20,7 @@ html, body {
   height: 100vh;
   width: 100vw;
   position: relative;
+  overflow: hidden;
 }
 
 /* Background beams */
@@ -31,15 +32,20 @@ html, body {
   pointer-events: none;
 }
 
-/* === Top vocal section (CROPPED PROPERLY) === */
+/* === Top vocal section === */
 #vocal {
-  width: 360px;           /* match vocal.html container */
+  width: 360px;
   height: 40vh;
   border: none;
   z-index: 10;
-  background: green;      /* debug stays */
+
+  background: transparent;
+
   display: block;
-  margin-left: 40px;      /* spacing from left */
+  margin-left: 40px;
+
+  /* slight transparency so beams glow through */
+  opacity: 0.96;
 }
 
 /* Lower main area */
@@ -74,7 +80,8 @@ html, body {
   z-index: 30;
 }
 
-#wub, #bell {
+#wub,
+#bell {
   width: 200px;
   height: 110px;
   border: none;
@@ -88,7 +95,11 @@ html, body {
 <div id="app">
 
   <iframe id="beams"></iframe>
-  <iframe id="vocal" allowtransparency="true"></iframe>
+
+  <iframe
+    id="vocal"
+    allowtransparency="true">
+  </iframe>
 
   <div id="lowerSection">
 
@@ -106,10 +117,17 @@ html, body {
 <script>
 const version = Date.now();
 
-document.getElementById("beams").src = "beams.html?v=" + version;
-document.getElementById("vocal").src = "vocal.html?v=" + version;
-document.getElementById("wub").src = "wub.html?v=" + version;
-document.getElementById("bell").src = "bell.html?v=" + version;
+document.getElementById("beams").src =
+  "beams.html?v=" + version;
+
+document.getElementById("vocal").src =
+  "vocal.html?v=" + version;
+
+document.getElementById("wub").src =
+  "wub.html?v=" + version;
+
+document.getElementById("bell").src =
+  "bell.html?v=" + version;
 
 const app = document.getElementById("app");
 const vocalIframe = document.getElementById("vocal");
@@ -123,23 +141,40 @@ let currentPanel = null;
 
 /* iOS safe height clamp */
 function clampHeights(){
-  const H = window.innerHeight || document.documentElement.clientHeight;
+
+  const H =
+    window.innerHeight ||
+    document.documentElement.clientHeight;
+
   app.style.height = H + "px";
 
   const vocalH = Math.round(H * 0.40);
+
   vocalIframe.style.height = vocalH + "px";
-  lowerSection.style.height = (H - vocalH) + "px";
+
+  lowerSection.style.height =
+    (H - vocalH) + "px";
 }
 
 clampHeights();
+
 window.addEventListener("resize", clampHeights);
-window.addEventListener("orientationchange", () => setTimeout(clampHeights, 50));
+
+window.addEventListener(
+  "orientationchange",
+  () => setTimeout(clampHeights, 50)
+);
 
 function togglePanel(src){
+
   if (currentPanel !== src) {
-    sliderPanel.src = src + "?v=" + version;
+
+    sliderPanel.src =
+      src + "?v=" + version;
+
     currentPanel = src;
   }
+
   sliderPanel.style.display = "block";
 }
 
