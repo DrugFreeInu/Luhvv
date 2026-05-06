@@ -6,38 +6,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-html, body {
+html,
+body {
   margin: 0;
-  background: transparent; /* important */
+  width: 100%;
   height: 100%;
-  position: relative;
+  background: transparent;
+  overflow: hidden;
   font-family: system-ui;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* WUB button positioned top-right */
 #wubBtn {
-  position: absolute;
-  top: 20%;
-  right: 8%;
+  width: 120px;
+  height: 58px;
 
-  width: 180px;
-  height: 70px;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 1px;
 
-  font-size: 20px;
   background: red;
   border: 2px solid white;
   color: white;
+
   cursor: pointer;
 }
 
-/* subtle press feedback */
 #wubBtn:active {
   background: rgba(255, 0, 0, 0.75);
 }
 
-/* optional glow on hover */
 #wubBtn:hover {
-  box-shadow: 0 0 20px rgba(255,0,0,0.6);
+  box-shadow: 0 0 18px rgba(255,0,0,0.55);
 }
 </style>
 </head>
@@ -52,7 +54,6 @@ let osc1, osc2, subOsc;
 let filter, gainNode;
 let isPlaying = false;
 
-/* Parameter state */
 let params = {
   freq: 55,
   subLevel: 1,
@@ -72,6 +73,7 @@ function initAudio(){
 
 function startWub(){
   if(isPlaying) return;
+
   initAudio();
 
   window.parent.postMessage("openWub", "*");
@@ -101,7 +103,10 @@ function startWub(){
   osc2.start();
   subOsc.start();
 
-  gainNode.gain.linearRampToValueAtTime(params.gain, ctx.currentTime + 0.05);
+  gainNode.gain.linearRampToValueAtTime(
+    params.gain,
+    ctx.currentTime + 0.05
+  );
 
   isPlaying = true;
 }
@@ -109,9 +114,12 @@ function startWub(){
 function stopWub(){
   if(!isPlaying) return;
 
-  gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.05);
+  gainNode.gain.linearRampToValueAtTime(
+    0,
+    ctx.currentTime + 0.05
+  );
 
-  setTimeout(()=>{
+  setTimeout(() => {
     osc1.stop();
     osc2.stop();
     subOsc.stop();
@@ -134,7 +142,6 @@ function updateAudio(){
   gainNode.gain.value = params.gain;
 }
 
-/* Listen for slider messages from parent */
 window.addEventListener("message", (e) => {
   if(e.data.type === "wubParam"){
     params[e.data.param] = parseFloat(e.data.value);
