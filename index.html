@@ -6,11 +6,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-html, body {
+html,
+body {
   margin: 0;
   height: 100%;
   background: #000;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   overflow: hidden;
 }
 
@@ -58,11 +63,12 @@ html, body {
 /* sliders LEFT SIDE */
 #sliderPanel {
   position: absolute;
-  left: -18px;
-  top: 160px;
 
-  width: 300px;
-  height: 300px;
+  left: 8px;
+  top: 175px;
+
+  width: 220px;
+  height: 320px;
 
   border: none;
   background: transparent;
@@ -76,25 +82,29 @@ html, body {
 #engineRail {
   position: absolute;
 
-  right: 56px;
-  top: 170px;
+  right: 52px;
+  top: 182px;
 
   display: flex;
   flex-direction: column;
-  gap: 26px;
+
+  gap: 38px;
 
   align-items: flex-end;
 
   z-index: 30;
 }
 
+/* smaller buttons */
 #wub,
 #bell {
-  width: 128px;
-  height: 64px;
+  width: 120px;
+  height: 52px;
 
   border: none;
   background: transparent;
+
+  overflow: hidden;
 }
 </style>
 </head>
@@ -159,14 +169,23 @@ document.getElementById("wub").src =
 document.getElementById("bell").src =
   "bell.html?v=" + version;
 
-const app = document.getElementById("app");
-const vocalIframe = document.getElementById("vocal");
-const lowerSection = document.getElementById("lowerSection");
+const app =
+  document.getElementById("app");
 
-const sliderPanel = document.getElementById("sliderPanel");
+const vocalIframe =
+  document.getElementById("vocal");
 
-const wubFrame = document.getElementById("wub");
-const bellFrame = document.getElementById("bell");
+const lowerSection =
+  document.getElementById("lowerSection");
+
+const sliderPanel =
+  document.getElementById("sliderPanel");
+
+const wubFrame =
+  document.getElementById("wub");
+
+const bellFrame =
+  document.getElementById("bell");
 
 let currentPanel = null;
 
@@ -179,11 +198,17 @@ function clampHeights(){
 
   app.style.height = H + "px";
 
-  const vocalH = Math.round(H * 0.40);
-  const lowerH = H - vocalH;
+  const vocalH =
+    Math.round(H * 0.40);
 
-  vocalIframe.style.height = vocalH + "px";
-  lowerSection.style.height = lowerH + "px";
+  const lowerH =
+    H - vocalH;
+
+  vocalIframe.style.height =
+    vocalH + "px";
+
+  lowerSection.style.height =
+    lowerH + "px";
 }
 
 clampHeights();
@@ -195,7 +220,10 @@ window.addEventListener(
 
 window.addEventListener(
   "orientationchange",
-  () => setTimeout(clampHeights, 80)
+  () => setTimeout(
+    clampHeights,
+    80
+  )
 );
 
 /* open slider panel */
@@ -209,27 +237,36 @@ function togglePanel(src){
     currentPanel = src;
   }
 
-  sliderPanel.style.display = "block";
+  sliderPanel.style.display =
+    "block";
 }
 
 /* messages */
-window.addEventListener("message", (e) => {
+window.addEventListener(
+  "message",
+  (e) => {
 
-  if(e.data === "openWub"){
-    togglePanel("wubcontrols.html");
-  }
+    if(e.data === "openWub"){
+      togglePanel(
+        "wubcontrols.html"
+      );
+    }
 
-  if(e.data === "openBell"){
-    togglePanel("bellcontrols.html");
-  }
+    if(e.data === "openBell"){
+      togglePanel(
+        "bellcontrols.html"
+      );
+    }
 
-  if(e.data.type === "wubParam"){
-    wubFrame.contentWindow.postMessage(e.data, "*");
-  }
+    if(e.data.type === "wubParam"){
+      wubFrame.contentWindow
+        .postMessage(e.data, "*");
+    }
 
-  if(e.data.type === "bellParam"){
-    bellFrame.contentWindow.postMessage(e.data, "*");
-  }
+    if(e.data.type === "bellParam"){
+      bellFrame.contentWindow
+        .postMessage(e.data, "*");
+    }
 
 });
 </script>
