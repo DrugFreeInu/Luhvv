@@ -27,7 +27,6 @@ body {
   background: #000;
 }
 
-/* background */
 #beams {
   position: fixed;
   inset: 0;
@@ -39,7 +38,6 @@ body {
   background: #000;
 }
 
-/* vocals */
 #vocal {
   position: relative;
   width: 360px;
@@ -52,7 +50,6 @@ body {
   opacity: 0.96;
 }
 
-/* lower area */
 #lowerSection {
   position: relative;
   height: 60vh;
@@ -60,50 +57,35 @@ body {
   background: transparent;
 }
 
-/* sliders LEFT SIDE */
 #sliderPanel {
   position: absolute;
-
   left: 8px;
   top: 175px;
-
   width: 220px;
   height: 320px;
-
   border: none;
   background: transparent;
-
   display: none;
-
   z-index: 20;
 }
 
-/* buttons RIGHT SIDE */
 #engineRail {
   position: absolute;
-
   right: 52px;
   top: 182px;
-
   display: flex;
   flex-direction: column;
-
   gap: 38px;
-
   align-items: flex-end;
-
   z-index: 30;
 }
 
-/* smaller buttons */
 #wub,
 #bell {
   width: 120px;
   height: 52px;
-
   border: none;
   background: transparent;
-
   overflow: hidden;
 }
 </style>
@@ -113,28 +95,20 @@ body {
 
 <div id="app">
 
-  <!-- background -->
-  <iframe
-    id="beams"
-    src="beams.html">
-  </iframe>
+  <iframe id="beams"></iframe>
 
-  <!-- vocals -->
   <iframe
     id="vocal"
     allowtransparency="true">
   </iframe>
 
-  <!-- lower -->
   <div id="lowerSection">
 
-    <!-- sliders -->
     <iframe
       id="sliderPanel"
       allowtransparency="true">
     </iframe>
 
-    <!-- buttons -->
     <div id="engineRail">
 
       <iframe
@@ -156,7 +130,6 @@ body {
 <script>
 const version = Date.now();
 
-/* cache bust */
 document.getElementById("beams").src =
   "beams.html?v=" + version;
 
@@ -187,9 +160,6 @@ const wubFrame =
 const bellFrame =
   document.getElementById("bell");
 
-let currentPanel = null;
-
-/* iOS height clamp */
 function clampHeights(){
 
   const H =
@@ -226,36 +196,34 @@ window.addEventListener(
   )
 );
 
-/* open slider panel */
-function togglePanel(src){
+function openPanel(engine){
 
-  if (currentPanel !== src) {
-
+  if(!sliderPanel.src){
     sliderPanel.src =
-      src + "?v=" + version;
-
-    currentPanel = src;
+      "wubbell.html?v=" + version;
   }
 
   sliderPanel.style.display =
     "block";
+
+  setTimeout(() => {
+    sliderPanel.contentWindow.postMessage({
+      type: "setEngine",
+      engine: engine
+    }, "*");
+  }, 80);
 }
 
-/* messages */
 window.addEventListener(
   "message",
   (e) => {
 
     if(e.data === "openWub"){
-      togglePanel(
-        "wubcontrols.html"
-      );
+      openPanel("wub");
     }
 
     if(e.data === "openBell"){
-      togglePanel(
-        "bellcontrols.html"
-      );
+      openPanel("bell");
     }
 
     if(e.data.type === "wubParam"){
