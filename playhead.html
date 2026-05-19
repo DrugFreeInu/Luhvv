@@ -1,0 +1,425 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<style>
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:#101010;
+  overflow:hidden;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:Arial,Helvetica,sans-serif;
+}
+
+.wrap{
+  width:82vw;
+  max-width:900px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:28px;
+}
+
+.topControls{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.playBtn{
+  width:66px;
+  height:66px;
+  border-radius:50%;
+  border:0;
+  background:#eee;
+  color:#111;
+  font-size:27px;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:
+    0 0 16px rgba(255,255,255,.45),
+    0 0 34px rgba(255,255,255,.18),
+    inset 0 0 0 2px rgba(255,255,255,.4);
+  transition:transform .14s ease, box-shadow .18s ease;
+}
+
+.playBtn:hover,
+.playBtn.playing{
+  box-shadow:
+    0 0 22px rgba(255,255,255,.75),
+    0 0 52px rgba(255,255,255,.28),
+    0 0 90px rgba(255,255,255,.12),
+    inset 0 0 0 2px rgba(255,255,255,.65);
+}
+
+.playBtn:active{ transform:scale(.94); }
+
+.synthBtn{
+  height:46px;
+  border:0;
+  border-radius:999px;
+  padding:0 20px;
+  background:#202020;
+  color:#eee;
+  font-size:15px;
+  font-weight:bold;
+  letter-spacing:.5px;
+  cursor:pointer;
+  outline:none;
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,.08),
+    inset 0 6px 18px rgba(0,0,0,.55),
+    0 0 22px rgba(255,255,255,.08);
+  transition:transform .14s ease, box-shadow .18s ease;
+}
+
+.synthBtn:hover{
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,.14),
+    inset 0 6px 18px rgba(0,0,0,.55),
+    0 0 34px rgba(255,255,255,.14),
+    0 0 60px rgba(255,255,255,.06);
+}
+
+.synthBtn:active{ transform:scale(.96); }
+
+.bar{
+  position:relative;
+  width:100%;
+  height:28px;
+  border-radius:999px;
+  overflow:hidden;
+  cursor:pointer;
+  background:#202020;
+  transform-origin:center;
+  transition:transform .18s ease, box-shadow .18s ease;
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,.08),
+    inset 0 6px 18px rgba(0,0,0,.55),
+    0 0 24px rgba(0,0,0,.55);
+}
+
+.bar.zooming{
+  transform:scaleY(2.4) scaleX(1.03);
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,.1),
+    inset 0 6px 18px rgba(0,0,0,.55),
+    0 0 32px rgba(255,255,255,.08),
+    0 0 54px rgba(255,255,255,.06);
+}
+
+.fill{
+  position:absolute;
+  left:0;
+  top:0;
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  background:
+    linear-gradient(
+      90deg,
+      #ffffff 0%,
+      #cfcfcf 35%,
+      #ffffff 70%,
+      #777 100%
+    );
+  box-shadow:
+    0 0 18px rgba(255,255,255,.45),
+    0 0 38px rgba(255,255,255,.16);
+  transition:width .18s ease;
+}
+
+.fill::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    repeating-linear-gradient(
+      115deg,
+      rgba(0,0,0,.16) 0px,
+      rgba(0,0,0,.16) 8px,
+      transparent 8px,
+      transparent 18px
+    );
+  opacity:.45;
+}
+
+.tip{
+  position:absolute;
+  right:-6px;
+  top:50%;
+  transform:translateY(-50%);
+  width:18px;
+  height:38px;
+  border-radius:999px;
+  background:white;
+  box-shadow:
+    0 0 14px rgba(255,255,255,.8),
+    0 0 36px rgba(255,255,255,.35);
+}
+
+/* embedded rewind */
+.rewindWrap{
+  position:absolute;
+  left:8px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:6;
+  opacity:1;
+  transition:opacity .22s ease, transform .22s ease;
+}
+
+.rewindBtn{
+  height:22px;
+  min-width:42px;
+  border:0;
+  border-radius:999px;
+  background:rgba(255,255,255,.1);
+  color:#f1f1f1;
+  font-size:12px;
+  font-weight:bold;
+  cursor:pointer;
+  backdrop-filter:blur(8px);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.11),
+    0 0 14px rgba(255,255,255,.06);
+}
+
+.rewindBtn.active{
+  background:rgba(255,255,255,.22);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.22),
+    0 0 22px rgba(255,255,255,.18);
+}
+
+/* menu inside bar */
+.barMenuWrap{
+  position:absolute;
+  right:8px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:5;
+  opacity:1;
+  transition:opacity .22s ease, transform .22s ease;
+}
+
+.bar.active .barMenuWrap{
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(-50%) translateX(10px);
+}
+
+.bar.active .rewindWrap{
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(-50%) translateX(-10px);
+}
+
+.barMenu{
+  height:22px;
+  border:0;
+  border-radius:999px;
+  padding:0 10px;
+  background:rgba(255,255,255,.1);
+  color:#f1f1f1;
+  font-size:11px;
+  font-weight:bold;
+  letter-spacing:.35px;
+  outline:none;
+  cursor:pointer;
+  backdrop-filter:blur(8px);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.11),
+    0 0 14px rgba(255,255,255,.06);
+}
+
+.barMenu option{
+  background:#202020;
+  color:#eee;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+  <div class="topControls">
+    <button class="playBtn" id="playBtn">▶</button>
+    <button class="synthBtn" id="synthBtn">Synth</button>
+  </div>
+
+  <div class="bar" id="bar">
+
+    <div class="fill" id="fill">
+      <div class="tip"></div>
+    </div>
+
+    <div class="rewindWrap">
+      <button class="rewindBtn" id="rewindBtn">◀ RE</button>
+    </div>
+
+    <div class="barMenuWrap">
+      <select class="barMenu" id="soundMenu">
+        <option>Intro</option>
+        <option>Vocals</option>
+        <option>Melody</option>
+        <option>Rise</option>
+        <option>Drop</option>
+        <option>Bass</option>
+        <option>Outro</option>
+      </select>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+const playBtn = document.getElementById("playBtn")
+const synthBtn = document.getElementById("synthBtn")
+const rewindBtn = document.getElementById("rewindBtn")
+const soundMenu = document.getElementById("soundMenu")
+const bar = document.getElementById("bar")
+const fill = document.getElementById("fill")
+
+let playing = false
+let rewinding = false
+let dragging = false
+let progress = 0
+let speed = 0.003
+
+function draw(){
+  fill.style.width = (progress * 100) + "%"
+}
+
+function updateBarState(){
+  if(playing || dragging){
+    bar.classList.add("active")
+    playBtn.classList.add("playing")
+  }else{
+    bar.classList.remove("active")
+    playBtn.classList.remove("playing")
+  }
+
+  rewindBtn.classList.toggle("active", rewinding)
+}
+
+function setProgress(clientX){
+  const rect = bar.getBoundingClientRect()
+  let x = clientX - rect.left
+  x = Math.max(0, Math.min(rect.width, x))
+  progress = x / rect.width
+  draw()
+}
+
+function pause(){
+  playing = false
+  playBtn.textContent = "▶"
+  updateBarState()
+}
+
+function loop(){
+  if(playing && !dragging){
+
+    if(rewinding){
+      progress -= speed
+      if(progress < 0) progress = 1
+    }else{
+      progress += speed
+      if(progress > 1) progress = 0
+    }
+
+    draw()
+  }
+
+  requestAnimationFrame(loop)
+}
+
+loop()
+
+playBtn.onclick = ()=>{
+  playing = !playing
+  playBtn.textContent = playing ? "❚❚" : "▶"
+  updateBarState()
+}
+
+rewindBtn.onclick = (e)=>{
+  e.stopPropagation()
+  rewinding = !rewinding
+  rewindBtn.textContent = rewinding ? "◀ ON" : "◀ RE"
+  updateBarState()
+}
+
+synthBtn.onclick = ()=>{
+  pause()
+  progress = .5
+  draw()
+
+  bar.classList.add("zooming")
+
+  setTimeout(()=>{
+    if(!dragging){
+      bar.classList.remove("zooming")
+    }
+  },220)
+}
+
+soundMenu.addEventListener("mousedown",(e)=>e.stopPropagation())
+soundMenu.addEventListener("touchstart",(e)=>e.stopPropagation(),{passive:true})
+soundMenu.addEventListener("change",()=>pause())
+
+rewindBtn.addEventListener("mousedown",(e)=>e.stopPropagation())
+rewindBtn.addEventListener("touchstart",(e)=>e.stopPropagation(),{passive:true})
+
+bar.addEventListener("mousedown",(e)=>{
+  dragging = true
+  pause()
+  fill.style.transition = "none"
+  bar.classList.add("zooming")
+  updateBarState()
+  setProgress(e.clientX)
+})
+
+window.addEventListener("mousemove",(e)=>{
+  if(!dragging) return
+  setProgress(e.clientX)
+})
+
+window.addEventListener("mouseup",()=>{
+  dragging = false
+  fill.style.transition = "width .18s ease"
+  bar.classList.remove("zooming")
+  updateBarState()
+})
+
+bar.addEventListener("touchstart",(e)=>{
+  dragging = true
+  pause()
+  fill.style.transition = "none"
+  bar.classList.add("zooming")
+  updateBarState()
+  setProgress(e.touches[0].clientX)
+},{passive:true})
+
+window.addEventListener("touchmove",(e)=>{
+  if(!dragging) return
+  setProgress(e.touches[0].clientX)
+},{passive:true})
+
+window.addEventListener("touchend",()=>{
+  dragging = false
+  fill.style.transition = "width .18s ease"
+  bar.classList.remove("zooming")
+  updateBarState()
+})
+</script>
+
+</body>
+</html>
