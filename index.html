@@ -95,6 +95,73 @@ body {
   background: transparent;
   z-index: 25;
 }
+
+/* ───────── SPIN SYSTEM ───────── */
+
+#spinToggle {
+  position: absolute;
+  left: 18px;
+  bottom: 22px;
+
+  width: 88px;
+  height: 44px;
+
+  border: none;
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(34,34,50,.96),
+      rgba(10,10,18,.96)
+    );
+
+  color: #fff;
+
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .08em;
+
+  box-shadow:
+    0 0 18px rgba(255,0,180,.22),
+    0 0 40px rgba(0,180,255,.12),
+    inset 0 1px 0 rgba(255,255,255,.08);
+
+  backdrop-filter: blur(16px);
+
+  z-index: 60;
+
+  cursor: pointer;
+
+  transition:
+    transform .18s ease,
+    box-shadow .25s ease,
+    opacity .25s ease;
+}
+
+#spinToggle:active {
+  transform: scale(.96);
+}
+
+#spinFrame {
+  position: absolute;
+  inset: 0;
+
+  width: 100vw;
+  height: 100vh;
+
+  border: none;
+  background: transparent;
+
+  z-index: 15;
+
+  pointer-events: none;
+
+  opacity: 0;
+
+  transition:
+    opacity .45s ease;
+}
 </style>
 </head>
 
@@ -137,6 +204,17 @@ body {
 
   </div>
 
+  <!-- SPIN OVERLAY -->
+  <iframe
+    id="spinFrame"
+    allowtransparency="true">
+  </iframe>
+
+  <!-- SPIN BUTTON -->
+  <button id="spinToggle">
+    SPIN
+  </button>
+
 </div>
 
 <script>
@@ -174,6 +252,46 @@ const wubFrame =
 
 const bellFrame =
   document.getElementById("bell");
+
+/* ───────── SPIN SYSTEM ───────── */
+
+const spinToggle =
+  document.getElementById("spinToggle");
+
+const spinFrame =
+  document.getElementById("spinFrame");
+
+let spinOn = false;
+
+spinFrame.src =
+  "spin.html?v=" + version;
+
+spinToggle.addEventListener(
+  "click",
+  () => {
+
+    spinOn = !spinOn;
+
+    spinFrame.style.opacity =
+      spinOn ? "1" : "0";
+
+    spinToggle.textContent =
+      spinOn ? "SPIN ON" : "SPIN";
+
+    spinToggle.style.boxShadow =
+      spinOn
+        ? `
+          0 0 28px rgba(255,0,180,.45),
+          0 0 60px rgba(0,180,255,.25),
+          inset 0 1px 0 rgba(255,255,255,.12)
+        `
+        : `
+          0 0 18px rgba(255,0,180,.22),
+          0 0 40px rgba(0,180,255,.12),
+          inset 0 1px 0 rgba(255,255,255,.08)
+        `;
+  }
+);
 
 function clampHeights(){
 
